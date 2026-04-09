@@ -66,9 +66,15 @@ function buildPresentationCustomization(brief: PresentationBrief): PresentationC
 
 function sseResponse(pages: string): Response {
   const encoder = new TextEncoder()
+  // Send in small chunks (~4KB each) to prevent SSE line splitting
+  // when the network chunks the HTTP response mid-line
+  const CHUNK_SIZE = 4096
   const readable = new ReadableStream({
     start(controller) {
-      controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: pages })}\n\n`))
+      for (let i = 0; i < pages.length; i += CHUNK_SIZE) {
+        const chunk = pages.substring(i, i + CHUNK_SIZE)
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: chunk })}\n\n`))
+      }
       controller.enqueue(encoder.encode('data: [DONE]\n\n'))
       controller.close()
     },
