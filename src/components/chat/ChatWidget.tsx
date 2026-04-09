@@ -5,12 +5,15 @@ import { useI18n } from '@/lib/i18n/context'
 import type { ProjectSummary, PrototypePage } from '@/types/database'
 import VoiceButton from './VoiceButton'
 import SummaryCard from './SummaryCard'
+import BuildingPreview, { ADDON_POOL } from './BuildingPreview'
 import PrototypeViewer from '@/components/prototype/PrototypeViewer'
 
 interface Message {
   role: 'user' | 'assistant'
   content: string
 }
+
+type Phase = 'chat' | 'building' | 'preview'
 
 export default function ChatWidget() {
   const { t } = useI18n()
@@ -19,8 +22,10 @@ export default function ChatWidget() {
   const [loading, setLoading] = useState(false)
   const [streamingText, setStreamingText] = useState('')
   const [summary, setSummary] = useState<ProjectSummary | null>(null)
-  const [generatingPrototype, setGeneratingPrototype] = useState(false)
+  const [phase, setPhase] = useState<Phase>('chat')
+  const [buildProgress, setBuildProgress] = useState(0)
   const [prototypePages, setPrototypePages] = useState<PrototypePage[]>([])
+  const [selectedAddons, setSelectedAddons] = useState<string[]>([])
   const [prototypeError, setPrototypeError] = useState<string | null>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -117,8 +122,17 @@ export default function ChatWidget() {
 
   const handleGeneratePrototype = async () => {
     if (!summary) return
-    setGeneratingPrototype(true)
+    setPhase('building')
+    setBuildProgress(0)
     setPrototypeError(null)
+
+    // Simulate progress while streaming
+    const progressInterval = setInterval(() => {
+      setBuildProgress((prev) => {
+        if (prev >= 90) return prev
+        return prev + Math.random() * 8
+      })
+    }, 800)
 
     try {
       const response = await fetch('/api/prototype', {
@@ -132,19 +146,65 @@ export default function ChatWidget() {
 
       if (!response.ok) throw new Error('Prototype generation failed')
 
-      const data = await response.json() as { pages: PrototypePage[] }
-      setPrototypePages(data.pages)
+      const reader = response.body?.getReader()
+      if (!reader) throw new Error('No reader')
+
+      const decoder = new TextDecoder()
+      let fullText = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        const chunk = decoder.decode(value, { stream: true })
+        const lines = chunk.split('\n')
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6)
+            if (data === '[DONE]') continue
+            try {
+              const parsed = JSON.parse(data) as { text: string }
+              fullText += parsed.text
+            } catch { /* skip */ }
+          }
+        }
+      }
+
+      clearInterval(progressInterval)
+      setBuildProgress(100)
+
+      // Extract JSON from streamed text
+      const jsonMatch = fullText.match(/```json\n?([\s\S]*?)```/)
+      if (!jsonMatch) {
+        // Try parsing the entire text as JSON array
+        const arrayMatch = fullText.match(/\[\s*\{[\s\S]*\}\s*\]/)
+        if (!arrayMatch) throw new Error('No valid JSON found')
+        const pages = JSON.parse(arrayMatch[0]) as PrototypePage[]
+        setPrototypePages(pages.map((p, i) => ({ ...p, order: i })))
+      } else {
+        const pages = JSON.parse(jsonMatch[1]) as PrototypePage[]
+        setPrototypePages(pages.map((p, i) => ({ ...p, order: i })))
+      }
+
+      setTimeout(() => setPhase('preview'), 500)
     } catch {
+      clearInterval(progressInterval)
       setPrototypeError('Error generando el prototipo. Inténtalo de nuevo.')
-    } finally {
-      setGeneratingPrototype(false)
+      setPhase('chat')
     }
+  }
+
+  const handleToggleAddon = (id: string) => {
+    setSelectedAddons((prev) =>
+      prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]
+    )
   }
 
   const handleRequestChanges = () => {
     setSummary(null)
     setPrototypePages([])
     setPrototypeError(null)
+    setPhase('chat')
+    setSelectedAddons([])
     inputRef.current?.focus()
   }
 
@@ -158,16 +218,18 @@ export default function ChatWidget() {
     sendMessage(transcript)
   }
 
-  // Show prototype viewer if pages are generated
-  if (prototypePages.length > 0 && summary) {
+  const addonsTotal = ADDON_POOL.filter(a => selectedAddons.includes(a.id)).reduce((sum, a) => sum + a.price, 0)
+
+  // PHASE: PREVIEW — full-width prototype viewer
+  if (phase === 'preview' && prototypePages.length > 0 && summary) {
     return (
-      <section id="chat" className="py-32 px-6 bg-surface">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              Tu <span className="gradient-text">prototipo</span>
+      <section id="chat" className="py-20 px-6 bg-surface">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl md:text-4xl font-bold mb-3">
+              Tu <span className="gradient-text">prototipo</span> está listo
             </h2>
-            <p className="text-muted text-lg">
+            <p className="text-muted">
               {summary.name} — {prototypePages.length} pantallas generadas con IA
             </p>
           </div>
@@ -176,18 +238,103 @@ export default function ChatWidget() {
             pages={prototypePages}
             projectName={summary.name}
             onApprove={() => {
-              const section = document.getElementById('chat')
-              if (section) {
-                section.innerHTML = '<div class="py-32 px-6 text-center"><div class="max-w-md mx-auto"><div class="w-20 h-20 rounded-full bg-neon-green/20 flex items-center justify-center mx-auto mb-6"><svg class="w-10 h-10 text-neon-green" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></div><h2 class="text-3xl font-bold mb-3">Prototipo aprobado</h2><p class="text-muted">Te contactaremos pronto para iniciar el desarrollo. Recibirás un email con los próximos pasos y el enlace de pago.</p></div></div>'
-              }
+              setPhase('chat')
+              setMessages((prev) => [
+                ...prev,
+                { role: 'assistant', content: `¡Prototipo aprobado! 🎉\n\nTu proyecto "${summary.name}" está listo para comenzar.\n\nTotal: ${(summary.total_price + addonsTotal).toLocaleString()}€${addonsTotal > 0 ? ` (incluye extras por ${addonsTotal.toLocaleString()}€)` : ''}\n\nTe contactaremos pronto con los próximos pasos y el enlace de pago del depósito (50%).` },
+              ])
+              setSummary(null)
+              setPrototypePages([])
             }}
             onRequestChanges={handleRequestChanges}
           />
+
+          {/* Selected addons summary below viewer */}
+          {selectedAddons.length > 0 && (
+            <div className="mt-6 p-5 rounded-2xl bg-surface-2 border border-neon-green/20">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-sm font-semibold">Extras incluidos</h4>
+                <span className="text-neon-green font-bold">+{addonsTotal.toLocaleString()}€</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {ADDON_POOL.filter(a => selectedAddons.includes(a.id)).map((a) => (
+                  <span key={a.id} className="px-3 py-1 rounded-full text-xs bg-neon-green/10 text-neon-green border border-neon-green/20">
+                    {a.icon} {a.label} (+{a.price}€)
+                  </span>
+                ))}
+              </div>
+              <div className="mt-3 pt-3 border-t border-border flex justify-between">
+                <span className="text-muted text-sm">Nuevo total del proyecto</span>
+                <span className="text-xl font-bold gradient-text">{(summary.total_price + addonsTotal).toLocaleString()}€</span>
+              </div>
+            </div>
+          )}
         </div>
       </section>
     )
   }
 
+  // PHASE: BUILDING — split screen chat + building preview
+  if (phase === 'building' && summary) {
+    return (
+      <section id="chat" className="py-20 px-6 bg-surface">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-6">
+            {/* Left: Chat recap */}
+            <div className="rounded-2xl bg-surface-2 border border-border overflow-hidden flex flex-col">
+              <div className="px-6 py-4 border-b border-border flex items-center gap-3">
+                <div className="w-3 h-3 rounded-full bg-neon-green animate-pulse" />
+                <span className="text-sm text-muted">{t.chat_header}</span>
+              </div>
+              <div className="p-6 flex-1 max-h-[600px] overflow-y-auto space-y-4">
+                {messages.slice(-6).map((msg, i) => (
+                  <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm whitespace-pre-wrap ${
+                      msg.role === 'user'
+                        ? 'bg-gradient-to-r from-neon-cyan to-neon-green text-black'
+                        : 'bg-surface-3 text-foreground border border-border'
+                    }`}>
+                      {msg.content}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Summary mini */}
+              <div className="p-4 border-t border-border bg-surface-3/50">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-sm font-semibold">{summary.name}</div>
+                    <div className="text-xs text-muted">{summary.estimated_modules.length} módulos · {summary.timeline_days} días</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-lg font-bold gradient-text">
+                      {(summary.total_price + addonsTotal).toLocaleString()}€
+                    </div>
+                    {addonsTotal > 0 && (
+                      <div className="text-xs text-neon-green">+{addonsTotal.toLocaleString()}€ extras</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Building preview with upsells */}
+            <div className="rounded-2xl bg-surface-2 border border-border overflow-hidden">
+              <BuildingPreview
+                summary={summary}
+                selectedAddons={selectedAddons}
+                onToggleAddon={handleToggleAddon}
+                progress={buildProgress}
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  // PHASE: CHAT — normal chat flow
   return (
     <section id="chat" className="py-32 px-6 bg-surface">
       <div className="max-w-3xl mx-auto">
@@ -215,23 +362,17 @@ export default function ChatWidget() {
             )}
 
             {messages.map((msg, i) => (
-              <div
-                key={i}
-                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div
-                  className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm whitespace-pre-wrap ${
-                    msg.role === 'user'
-                      ? 'bg-gradient-to-r from-neon-cyan to-neon-green text-black'
-                      : 'bg-surface-3 text-foreground border border-border'
-                  }`}
-                >
+              <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm whitespace-pre-wrap ${
+                  msg.role === 'user'
+                    ? 'bg-gradient-to-r from-neon-cyan to-neon-green text-black'
+                    : 'bg-surface-3 text-foreground border border-border'
+                }`}>
                   {msg.content}
                 </div>
               </div>
             ))}
 
-            {/* Streaming text */}
             {streamingText && (
               <div className="flex justify-start">
                 <div className="max-w-[80%] px-4 py-3 rounded-2xl text-sm bg-surface-3 text-foreground border border-border whitespace-pre-wrap">
@@ -241,7 +382,6 @@ export default function ChatWidget() {
               </div>
             )}
 
-            {/* Loading dots */}
             {loading && !streamingText && (
               <div className="flex justify-start">
                 <div className="bg-surface-3 px-4 py-3 rounded-2xl border border-border">
@@ -255,17 +395,47 @@ export default function ChatWidget() {
             )}
           </div>
 
-          {/* Summary card */}
+          {/* Summary card with addon chips */}
           {summary && (
-            <SummaryCard
-              summary={summary}
-              onApprove={handleGeneratePrototype}
-              onRequestChanges={handleRequestChanges}
-              loading={generatingPrototype}
-            />
+            <>
+              <SummaryCard
+                summary={summary}
+                onApprove={handleGeneratePrototype}
+                onRequestChanges={handleRequestChanges}
+                loading={false}
+              />
+
+              {/* Addon chips below summary */}
+              <div className="mx-6 mb-4">
+                <p className="text-xs text-muted mb-2">Añade extras a tu proyecto:</p>
+                <div className="flex flex-wrap gap-2">
+                  {ADDON_POOL.slice(0, 5).map((addon) => {
+                    const selected = selectedAddons.includes(addon.id)
+                    return (
+                      <button
+                        key={addon.id}
+                        onClick={() => handleToggleAddon(addon.id)}
+                        className={`px-3 py-1.5 rounded-full text-xs transition-all ${
+                          selected
+                            ? 'bg-neon-green/20 text-neon-green border border-neon-green/30'
+                            : 'bg-surface-3 text-muted border border-border hover:border-neon-cyan/30'
+                        }`}
+                      >
+                        {addon.icon} {addon.label} <span className="font-mono">+{addon.price}€</span>
+                      </button>
+                    )
+                  })}
+                </div>
+                {addonsTotal > 0 && (
+                  <div className="mt-2 text-sm">
+                    <span className="text-muted">Nuevo total: </span>
+                    <span className="font-bold gradient-text">{(summary.total_price + addonsTotal).toLocaleString()}€</span>
+                  </div>
+                )}
+              </div>
+            </>
           )}
 
-          {/* Prototype error */}
           {prototypeError && (
             <div className="mx-6 mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
               {prototypeError}
@@ -281,13 +451,13 @@ export default function ChatWidget() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder={t.chat_placeholder}
-                disabled={loading || generatingPrototype}
+                disabled={loading}
                 className="flex-1 px-4 py-3 rounded-xl bg-surface-3 border border-border text-foreground placeholder:text-muted/50 focus:outline-none focus:border-neon-cyan/50 transition-colors disabled:opacity-50"
               />
-              <VoiceButton onResult={handleVoiceResult} disabled={loading || generatingPrototype} />
+              <VoiceButton onResult={handleVoiceResult} disabled={loading} />
               <button
                 type="submit"
-                disabled={!input.trim() || loading || generatingPrototype}
+                disabled={!input.trim() || loading}
                 className="px-6 py-3 rounded-xl bg-gradient-to-r from-neon-cyan to-neon-green text-black font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
               >
                 {t.chat_send}

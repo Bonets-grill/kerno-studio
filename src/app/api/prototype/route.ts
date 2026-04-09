@@ -1,6 +1,8 @@
 import { claude } from '@/lib/claude'
 import { buildPrototypePrompt } from '@/lib/prototype-prompt'
-import type { ProjectSummary, PrototypePage } from '@/types/database'
+import type { ProjectSummary } from '@/types/database'
+
+export const maxDuration = 60
 
 export async function POST(req: Request) {
   const { summary, branding } = await req.json() as {
@@ -9,7 +11,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const response = await claude.messages.create({
+    const stream = claude.messages.stream({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 16000,
       messages: [
@@ -20,26 +22,31 @@ export async function POST(req: Request) {
       ],
     })
 
-    const text = response.content
-      .filter((block) => block.type === 'text')
-      .map((block) => block.text)
-      .join('')
+    const encoder = new TextEncoder()
+    const readable = new ReadableStream({
+      async start(controller) {
+        for await (const event of stream) {
+          if (
+            event.type === 'content_block_delta' &&
+            event.delta.type === 'text_delta'
+          ) {
+            controller.enqueue(
+              encoder.encode(`data: ${JSON.stringify({ text: event.delta.text })}\n\n`)
+            )
+          }
+        }
+        controller.enqueue(encoder.encode('data: [DONE]\n\n'))
+        controller.close()
+      },
+    })
 
-    // Extract JSON from response
-    const jsonMatch = text.match(/```json\n?([\s\S]*?)```/)
-    if (!jsonMatch) {
-      return Response.json({ error: 'Failed to parse prototype pages' }, { status: 500 })
-    }
-
-    const pages = JSON.parse(jsonMatch[1]) as PrototypePage[]
-
-    // Add order field
-    const orderedPages = pages.map((page, i) => ({
-      ...page,
-      order: i,
-    }))
-
-    return Response.json({ pages: orderedPages })
+    return new Response(readable, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        Connection: 'keep-alive',
+      },
+    })
   } catch (error) {
     console.error('Prototype generation error:', error)
     return Response.json({ error: 'Failed to generate prototype' }, { status: 500 })
