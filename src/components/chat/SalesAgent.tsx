@@ -51,11 +51,7 @@ export default function SalesAgent({ agentId }: SalesAgentProps) {
     setMessages([])
 
     try {
-      // Get signed URL
-      const tokenRes = await fetch('/api/elevenlabs/token')
-      const tokenData = await tokenRes.json() as { signed_url?: string; error?: string }
-
-      const wsUrl = tokenData.signed_url || `wss://api.elevenlabs.io/v1/convai/conversation?agent_id=${agentId}`
+      const wsUrl = `wss://api.elevenlabs.io/v1/convai/conversation?agent_id=${agentId}`
       const ws = new WebSocket(wsUrl)
       wsRef.current = ws
 
