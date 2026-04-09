@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 
 interface VoiceButtonProps {
   onResult: (transcript: string) => void
@@ -9,11 +9,19 @@ interface VoiceButtonProps {
 
 export default function VoiceButton({ onResult, disabled }: VoiceButtonProps) {
   const [listening, setListening] = useState(false)
+  const [supported, setSupported] = useState(false)
   const recognitionRef = useRef<SpeechRecognition | null>(null)
 
+  useEffect(() => {
+    setSupported(
+      typeof window !== 'undefined' &&
+      ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)
+    )
+  }, [])
+
   const toggle = useCallback(() => {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      alert('Tu navegador no soporta reconocimiento de voz.')
+    if (!supported) {
+      alert('Tu navegador no soporta reconocimiento de voz. Prueba con Chrome.')
       return
     }
 
@@ -23,15 +31,17 @@ export default function VoiceButton({ onResult, disabled }: VoiceButtonProps) {
       return
     }
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-    const recognition = new SpeechRecognition()
+    const SpeechRecognitionClass = window.SpeechRecognition || window.webkitSpeechRecognition
+    const recognition = new SpeechRecognitionClass()
     recognition.lang = document.documentElement.lang || 'es'
     recognition.continuous = false
     recognition.interimResults = false
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
       const transcript = event.results[0][0].transcript
-      onResult(transcript)
+      if (transcript) {
+        onResult(transcript)
+      }
       setListening(false)
     }
 
@@ -44,9 +54,16 @@ export default function VoiceButton({ onResult, disabled }: VoiceButtonProps) {
     }
 
     recognitionRef.current = recognition
-    recognition.start()
-    setListening(true)
-  }, [listening, onResult])
+    try {
+      recognition.start()
+      setListening(true)
+    } catch {
+      setListening(false)
+      alert('No se pudo iniciar el reconocimiento de voz. Asegúrate de permitir el acceso al micrófono.')
+    }
+  }, [listening, onResult, supported])
+
+  if (!supported) return null
 
   return (
     <button

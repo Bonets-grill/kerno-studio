@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import type { ProjectSummary } from '@/types/database'
+import { useI18n } from '@/lib/i18n/context'
 
 interface Addon {
   id: string
@@ -43,6 +44,7 @@ interface BuildingPreviewProps {
 }
 
 export default function BuildingPreview({ summary, selectedAddons, onToggleAddon, progress }: BuildingPreviewProps) {
+  const { t } = useI18n()
   const [tipIndex, setTipIndex] = useState(0)
   const [fadeIn, setFadeIn] = useState(true)
 
@@ -80,16 +82,16 @@ export default function BuildingPreview({ summary, selectedAddons, onToggleAddon
           </div>
         </div>
 
-        <h3 className="text-xl font-bold mb-2">Construyendo tu prototipo</h3>
+        <h3 className="text-xl font-bold mb-2">{t.building_title}</h3>
         <p className="text-muted text-sm mb-6">
-          El sistema que cambiará todo en <span className="text-neon-cyan font-medium">{summary.name}</span>
+          {t.building_subtitle} <span className="text-neon-cyan font-medium">{summary.name}</span>
         </p>
 
         {/* Progress bar */}
         <div className="w-full max-w-xs mb-8">
           <div className="flex justify-between text-xs text-muted mb-1">
-            <span>Generando pantallas...</span>
-            <span>{Math.min(progress, 100)}%</span>
+            <span>{t.building_generating}</span>
+            <span>{Math.round(Math.min(progress, 100))}%</span>
           </div>
           <div className="w-full h-2 rounded-full bg-surface-3">
             <div
@@ -102,7 +104,7 @@ export default function BuildingPreview({ summary, selectedAddons, onToggleAddon
         {/* Rotating tip */}
         <div className={`max-w-sm transition-opacity duration-300 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
           <div className="p-4 rounded-xl bg-neon-cyan/5 border border-neon-cyan/10">
-            <span className="text-xs text-neon-cyan font-medium block mb-1">💡 ¿Sabías que...</span>
+            <span className="text-xs text-neon-cyan font-medium block mb-1">💡 {t.building_tip_label}</span>
             <p className="text-sm text-muted">{BUILDING_TIPS[tipIndex]}</p>
           </div>
         </div>
@@ -111,7 +113,7 @@ export default function BuildingPreview({ summary, selectedAddons, onToggleAddon
       {/* Upsell add-ons */}
       <div className="border-t border-border p-5">
         <h4 className="text-sm font-semibold mb-3">
-          Mejora tu proyecto <span className="text-muted font-normal">· añade extras</span>
+          {t.building_upsell_title} <span className="text-muted font-normal">· {t.building_upsell_subtitle}</span>
         </h4>
         <div className="space-y-2 max-h-[250px] overflow-y-auto">
           {addons.map((addon) => {

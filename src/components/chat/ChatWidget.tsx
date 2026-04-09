@@ -172,22 +172,47 @@ export default function ChatWidget() {
       clearInterval(progressInterval)
       setBuildProgress(100)
 
-      // Extract JSON from streamed text
+      // Extract JSON from streamed text — try multiple patterns
+      let pages: PrototypePage[] = []
+
+      // Try ```json ... ``` block
       const jsonMatch = fullText.match(/```json\n?([\s\S]*?)```/)
-      if (!jsonMatch) {
-        // Try parsing the entire text as JSON array
-        const arrayMatch = fullText.match(/\[\s*\{[\s\S]*\}\s*\]/)
-        if (!arrayMatch) throw new Error('No valid JSON found')
-        const pages = JSON.parse(arrayMatch[0]) as PrototypePage[]
-        setPrototypePages(pages.map((p, i) => ({ ...p, order: i })))
-      } else {
-        const pages = JSON.parse(jsonMatch[1]) as PrototypePage[]
-        setPrototypePages(pages.map((p, i) => ({ ...p, order: i })))
+      if (jsonMatch) {
+        try {
+          pages = JSON.parse(jsonMatch[1]) as PrototypePage[]
+        } catch { /* try next */ }
       }
 
+      // Try raw JSON array
+      if (pages.length === 0) {
+        const arrayMatch = fullText.match(/\[\s*\{[\s\S]*\}\s*\]/)
+        if (arrayMatch) {
+          try {
+            pages = JSON.parse(arrayMatch[0]) as PrototypePage[]
+          } catch { /* try next */ }
+        }
+      }
+
+      // Try to find individual page objects and assemble
+      if (pages.length === 0) {
+        const pageMatches = fullText.matchAll(/"name"\s*:\s*"([^"]+)"[\s\S]*?"slug"\s*:\s*"([^"]+)"[\s\S]*?"html"\s*:\s*"([\s\S]*?)(?:"\s*\})/g)
+        for (const match of pageMatches) {
+          try {
+            const html = JSON.parse(`"${match[3]}"`) as string
+            pages.push({ name: match[1], slug: match[2], html, order: pages.length })
+          } catch { /* skip malformed */ }
+        }
+      }
+
+      if (pages.length === 0) {
+        throw new Error('Could not parse prototype pages')
+      }
+
+      setPrototypePages(pages.map((p, i) => ({ ...p, order: i })))
       setTimeout(() => setPhase('preview'), 500)
-    } catch {
+    } catch (err) {
       clearInterval(progressInterval)
+      console.error('Prototype parse error:', err)
       setPrototypeError('Error generando el prototipo. Inténtalo de nuevo.')
       setPhase('chat')
     }

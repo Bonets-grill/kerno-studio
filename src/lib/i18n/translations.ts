@@ -71,6 +71,21 @@ export interface Translations {
   chat_placeholder: string
   chat_send: string
 
+  // Building / Prototype
+  building_title: string
+  building_subtitle: string
+  building_generating: string
+  building_tip_label: string
+  building_upsell_title: string
+  building_upsell_subtitle: string
+  building_addon_chips_label: string
+  prototype_ready_title: string
+  prototype_ready_subtitle: string
+  prototype_approve: string
+  prototype_change: string
+  prototype_extras_title: string
+  prototype_new_total: string
+
   // Footer
   footer_description: string
   footer_product: string
@@ -174,6 +189,20 @@ export const T: Record<Lang, Translations> = {
     chat_placeholder: 'Describe tu proyecto... (ej: una app para gestionar reservas)',
     chat_send: 'Enviar',
 
+    building_title: 'Construyendo tu prototipo',
+    building_subtitle: 'El sistema que cambiará todo en',
+    building_generating: 'Generando pantallas...',
+    building_tip_label: '¿Sabías que...',
+    building_upsell_title: 'Mejora tu proyecto',
+    building_upsell_subtitle: 'añade extras',
+    building_addon_chips_label: 'Añade extras a tu proyecto:',
+    prototype_ready_title: 'Tu prototipo está listo',
+    prototype_ready_subtitle: 'pantallas generadas con IA',
+    prototype_approve: 'Me gusta, aprobar',
+    prototype_change: 'Cambiar cosas',
+    prototype_extras_title: 'Extras incluidos',
+    prototype_new_total: 'Nuevo total del proyecto',
+
     footer_description: 'Transformamos ideas en productos digitales reales usando inteligencia artificial y un equipo experto de desarrollo.',
     footer_product: 'Producto',
     footer_legal: 'Legal',
@@ -274,6 +303,20 @@ export const T: Record<Lang, Translations> = {
     chat_empty_instruction: 'Describe your project and we\'ll generate a free prototype.',
     chat_placeholder: 'Describe your project... (e.g.: an app to manage bookings)',
     chat_send: 'Send',
+
+    building_title: 'Building your prototype',
+    building_subtitle: 'The system that will change everything at',
+    building_generating: 'Generating screens...',
+    building_tip_label: 'Did you know...',
+    building_upsell_title: 'Improve your project',
+    building_upsell_subtitle: 'add extras',
+    building_addon_chips_label: 'Add extras to your project:',
+    prototype_ready_title: 'Your prototype is ready',
+    prototype_ready_subtitle: 'screens generated with AI',
+    prototype_approve: 'I like it, approve',
+    prototype_change: 'Make changes',
+    prototype_extras_title: 'Extras included',
+    prototype_new_total: 'New project total',
 
     footer_description: 'We turn ideas into real digital products using artificial intelligence and an expert development team.',
     footer_product: 'Product',
@@ -376,6 +419,20 @@ export const T: Record<Lang, Translations> = {
     chat_placeholder: 'Décrivez votre projet... (ex: une app pour gérer les réservations)',
     chat_send: 'Envoyer',
 
+    building_title: 'Construction de votre prototype',
+    building_subtitle: 'Le système qui changera tout chez',
+    building_generating: 'Génération des écrans...',
+    building_tip_label: 'Le saviez-vous...',
+    building_upsell_title: 'Améliorez votre projet',
+    building_upsell_subtitle: 'ajoutez des extras',
+    building_addon_chips_label: 'Ajoutez des extras à votre projet :',
+    prototype_ready_title: 'Votre prototype est prêt',
+    prototype_ready_subtitle: 'écrans générés par IA',
+    prototype_approve: "J'aime, approuver",
+    prototype_change: 'Modifier',
+    prototype_extras_title: 'Extras inclus',
+    prototype_new_total: 'Nouveau total du projet',
+
     footer_description: "Nous transformons les idées en produits numériques réels grâce à l'intelligence artificielle et une équipe experte de développement.",
     footer_product: 'Produit',
     footer_legal: 'Légal',
@@ -476,6 +533,20 @@ export const T: Record<Lang, Translations> = {
     chat_empty_instruction: 'Beschreibe dein Projekt und wir erstellen einen kostenlosen Prototyp.',
     chat_placeholder: 'Beschreibe dein Projekt... (z.B.: eine App zur Verwaltung von Buchungen)',
     chat_send: 'Senden',
+
+    building_title: 'Prototyp wird erstellt',
+    building_subtitle: 'Das System, das alles verändern wird bei',
+    building_generating: 'Bildschirme werden generiert...',
+    building_tip_label: 'Wusstest du...',
+    building_upsell_title: 'Verbessere dein Projekt',
+    building_upsell_subtitle: 'Extras hinzufügen',
+    building_addon_chips_label: 'Extras zu deinem Projekt hinzufügen:',
+    prototype_ready_title: 'Dein Prototyp ist fertig',
+    prototype_ready_subtitle: 'KI-generierte Bildschirme',
+    prototype_approve: 'Gefällt mir, genehmigen',
+    prototype_change: 'Änderungen vornehmen',
+    prototype_extras_title: 'Extras enthalten',
+    prototype_new_total: 'Neuer Projektgesamtbetrag',
 
     footer_description: 'Wir verwandeln Ideen in echte digitale Produkte mit künstlicher Intelligenz und einem erfahrenen Entwicklungsteam.',
     footer_product: 'Produkt',
@@ -578,6 +649,20 @@ export const T: Record<Lang, Translations> = {
     chat_placeholder: 'Descrivi il tuo progetto... (es: un\'app per gestire prenotazioni)',
     chat_send: 'Invia',
 
+    building_title: 'Costruzione del prototipo',
+    building_subtitle: 'Il sistema che cambierà tutto in',
+    building_generating: 'Generazione schermate...',
+    building_tip_label: 'Lo sapevi che...',
+    building_upsell_title: 'Migliora il tuo progetto',
+    building_upsell_subtitle: 'aggiungi extra',
+    building_addon_chips_label: 'Aggiungi extra al tuo progetto:',
+    prototype_ready_title: 'Il tuo prototipo è pronto',
+    prototype_ready_subtitle: 'schermate generate con IA',
+    prototype_approve: 'Mi piace, approva',
+    prototype_change: 'Modifica',
+    prototype_extras_title: 'Extra inclusi',
+    prototype_new_total: 'Nuovo totale del progetto',
+
     footer_description: 'Trasformiamo le idee in prodotti digitali reali utilizzando intelligenza artificiale e un team esperto di sviluppo.',
     footer_product: 'Prodotto',
     footer_legal: 'Legale',
@@ -678,6 +763,20 @@ export const T: Record<Lang, Translations> = {
     chat_empty_instruction: 'Descreva seu projeto e geraremos um protótipo gratuito.',
     chat_placeholder: 'Descreva seu projeto... (ex: um app para gerenciar reservas)',
     chat_send: 'Enviar',
+
+    building_title: 'Construindo seu protótipo',
+    building_subtitle: 'O sistema que mudará tudo em',
+    building_generating: 'Gerando telas...',
+    building_tip_label: 'Você sabia que...',
+    building_upsell_title: 'Melhore seu projeto',
+    building_upsell_subtitle: 'adicione extras',
+    building_addon_chips_label: 'Adicione extras ao seu projeto:',
+    prototype_ready_title: 'Seu protótipo está pronto',
+    prototype_ready_subtitle: 'telas geradas com IA',
+    prototype_approve: 'Gostei, aprovar',
+    prototype_change: 'Fazer alterações',
+    prototype_extras_title: 'Extras incluídos',
+    prototype_new_total: 'Novo total do projeto',
 
     footer_description: 'Transformamos ideias em produtos digitais reais usando inteligência artificial e uma equipe especialista de desenvolvimento.',
     footer_product: 'Produto',
@@ -780,6 +879,20 @@ export const T: Record<Lang, Translations> = {
     chat_placeholder: 'Descriu el teu projecte... (ex: una app per gestionar reserves)',
     chat_send: 'Enviar',
 
+    building_title: 'Construint el teu prototip',
+    building_subtitle: 'El sistema que ho canviarà tot a',
+    building_generating: 'Generant pantalles...',
+    building_tip_label: 'Sabies que...',
+    building_upsell_title: 'Millora el teu projecte',
+    building_upsell_subtitle: 'afegeix extres',
+    building_addon_chips_label: 'Afegeix extres al teu projecte:',
+    prototype_ready_title: 'El teu prototip està llest',
+    prototype_ready_subtitle: 'pantalles generades amb IA',
+    prototype_approve: "M'agrada, aprovar",
+    prototype_change: 'Canviar coses',
+    prototype_extras_title: 'Extres inclosos',
+    prototype_new_total: 'Nou total del projecte',
+
     footer_description: "Transformem idees en productes digitals reals amb intel·ligència artificial i un equip expert de desenvolupament.",
     footer_product: 'Producte',
     footer_legal: 'Legal',
@@ -880,6 +993,20 @@ export const T: Record<Lang, Translations> = {
     chat_empty_instruction: 'Describe o teu proxecto e xeraremos un prototipo gratis.',
     chat_placeholder: 'Describe o teu proxecto... (ex: unha app para xestionar reservas)',
     chat_send: 'Enviar',
+
+    building_title: 'Construíndo o teu prototipo',
+    building_subtitle: 'O sistema que cambiará todo en',
+    building_generating: 'Xerando pantallas...',
+    building_tip_label: 'Sabías que...',
+    building_upsell_title: 'Mellora o teu proxecto',
+    building_upsell_subtitle: 'engade extras',
+    building_addon_chips_label: 'Engade extras ao teu proxecto:',
+    prototype_ready_title: 'O teu prototipo está listo',
+    prototype_ready_subtitle: 'pantallas xeradas con IA',
+    prototype_approve: 'Gústame, aprobar',
+    prototype_change: 'Cambiar cousas',
+    prototype_extras_title: 'Extras incluídos',
+    prototype_new_total: 'Novo total do proxecto',
 
     footer_description: 'Transformamos ideas en produtos dixitais reais usando intelixencia artificial e un equipo experto de desenvolvemento.',
     footer_product: 'Produto',

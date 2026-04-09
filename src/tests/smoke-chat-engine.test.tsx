@@ -64,12 +64,11 @@ describe('ChatWidget Component', () => {
     expect(screen.getByText(/soy el asistente/)).toBeInTheDocument()
   })
 
-  it('renders input, voice button, and send button', async () => {
+  it('renders input and send button', async () => {
     const ChatWidget = (await import('@/components/chat/ChatWidget')).default
     render(<ChatWidget />, { wrapper: TestWrapper })
     expect(screen.getByPlaceholderText(/Describe tu proyecto/)).toBeInTheDocument()
     expect(screen.getByText('Enviar')).toBeInTheDocument()
-    expect(screen.getByTitle(/Hablar/)).toBeInTheDocument()
   })
 
   it('send button disabled when empty', async () => {
@@ -88,18 +87,11 @@ describe('ChatWidget Component', () => {
 })
 
 describe('VoiceButton Component', () => {
-  it('renders mic icon button', async () => {
+  it('returns null when SpeechRecognition not supported', async () => {
     const VoiceButton = (await import('@/components/chat/VoiceButton')).default
-    render(<VoiceButton onResult={() => {}} />)
-    const button = screen.getByTitle(/Hablar/)
-    expect(button).toBeInTheDocument()
-    expect(button).not.toBeDisabled()
-  })
-
-  it('disables when disabled prop is true', async () => {
-    const VoiceButton = (await import('@/components/chat/VoiceButton')).default
-    render(<VoiceButton onResult={() => {}} disabled />)
-    expect(screen.getByTitle(/Hablar/)).toBeDisabled()
+    const { container } = render(<VoiceButton onResult={() => {}} />)
+    // jsdom has no SpeechRecognition, so button should not render
+    expect(container.innerHTML).toBe('')
   })
 })
 
