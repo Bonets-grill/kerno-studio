@@ -296,40 +296,41 @@ export default function ChatWidget() {
       clearInterval(progressInterval)
       setBuildProgress(100)
 
-      // Extract JSON from streamed text — try multiple patterns
+      // Parse pages from streamed text
       let pages: PrototypePage[] = []
 
-      // Try ```json ... ``` block
-      const jsonMatch = fullText.match(/```json\n?([\s\S]*?)```/)
-      if (jsonMatch) {
-        try {
-          pages = JSON.parse(jsonMatch[1]) as PrototypePage[]
-        } catch { /* try next */ }
-      }
+      // Method 1: Direct JSON.parse (works when fullText is the complete JSON array)
+      try {
+        pages = JSON.parse(fullText) as PrototypePage[]
+      } catch { /* try next */ }
 
-      // Try raw JSON array
+      // Method 2: Extract from ```json ... ``` block (legacy Claude responses)
       if (pages.length === 0) {
-        const arrayMatch = fullText.match(/\[\s*\{[\s\S]*\}\s*\]/)
-        if (arrayMatch) {
-          try {
-            pages = JSON.parse(arrayMatch[0]) as PrototypePage[]
-          } catch { /* try next */ }
+        const jsonMatch = fullText.match(/```json\n?([\s\S]*?)```/)
+        if (jsonMatch) {
+          try { pages = JSON.parse(jsonMatch[1]) as PrototypePage[] } catch { /* try next */ }
         }
       }
 
-      // Try to find individual page objects and assemble
+      // Method 3: Try to find the JSON array start/end by bracket matching
       if (pages.length === 0) {
-        const pageMatches = fullText.matchAll(/"name"\s*:\s*"([^"]+)"[\s\S]*?"slug"\s*:\s*"([^"]+)"[\s\S]*?"html"\s*:\s*"([\s\S]*?)(?:"\s*\})/g)
-        for (const match of pageMatches) {
-          try {
-            const html = JSON.parse(`"${match[3]}"`) as string
-            pages.push({ name: match[1], slug: match[2], html, order: pages.length })
-          } catch { /* skip malformed */ }
+        const start = fullText.indexOf('[')
+        if (start !== -1) {
+          // Find matching closing bracket
+          let depth = 0
+          let end = -1
+          for (let i = start; i < fullText.length; i++) {
+            if (fullText[i] === '[') depth++
+            else if (fullText[i] === ']') { depth--; if (depth === 0) { end = i; break } }
+          }
+          if (end !== -1) {
+            try { pages = JSON.parse(fullText.substring(start, end + 1)) as PrototypePage[] } catch { /* skip */ }
+          }
         }
       }
 
       if (pages.length === 0) {
-        throw new Error('Could not parse prototype pages')
+        throw new Error('Could not parse prototype pages from: ' + fullText.substring(0, 200))
       }
 
       setPrototypePages(pages.map((p, i) => ({ ...p, order: i })))
