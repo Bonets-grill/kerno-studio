@@ -41,17 +41,20 @@ export default function ChatWidget() {
     scrollToBottom()
   }, [messages, streamingText, scrollToBottom])
 
+  const sendMessageRef = useRef<(content: string) => void>(() => {})
+
   // Listen for ElevenLabs agent sending project summary
   useEffect(() => {
     const handleAgentSummary = (e: Event) => {
       const detail = (e as CustomEvent).detail
       if (detail?.message) {
-        sendMessage(detail.message)
+        document.getElementById('chat')?.scrollIntoView({ behavior: 'smooth' })
+        setTimeout(() => sendMessageRef.current(detail.message), 300)
       }
     }
     window.addEventListener('kerno:agent-summary', handleAgentSummary)
     return () => window.removeEventListener('kerno:agent-summary', handleAgentSummary)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [])
 
   const extractSummary = (text: string): ProjectSummary | null => {
     // Try complete json:summary block
@@ -190,6 +193,9 @@ export default function ChatWidget() {
       setLoading(false)
     }
   }
+
+  // Keep ref updated with latest sendMessage
+  sendMessageRef.current = sendMessage
 
   const handleGeneratePrototype = async () => {
     if (!summary) return

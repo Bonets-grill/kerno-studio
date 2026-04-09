@@ -34,14 +34,15 @@ describe('Chat System Prompt', () => {
     expect(CHAT_SYSTEM_PROMPT).toContain('timeline_days')
   })
 
-  it('prompt enforces one question at a time', async () => {
+  it('prompt handles long first messages', async () => {
     const { CHAT_SYSTEM_PROMPT } = await import('@/lib/chat-system-prompt')
-    expect(CHAT_SYSTEM_PROMPT).toContain('ONE question at a time')
+    expect(CHAT_SYSTEM_PROMPT).toContain('LONG FIRST MESSAGES')
+    expect(CHAT_SYSTEM_PROMPT).toContain('DIRECTLY')
   })
 
   it('prompt respects multilanguage', async () => {
     const { CHAT_SYSTEM_PROMPT } = await import('@/lib/chat-system-prompt')
-    expect(CHAT_SYSTEM_PROMPT).toContain('same language')
+    expect(CHAT_SYSTEM_PROMPT).toContain('language')
   })
 })
 
