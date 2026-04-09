@@ -3,10 +3,13 @@
  * Stores costs in memory (will move to Supabase when connected).
  */
 
+export const PRICE_MULTIPLIER = 7
+export const MIN_PRICE_CENTS = 99 // €0.99 minimum for Stripe
+
 export interface CostEntry {
   id: string
   timestamp: string
-  type: 'chat' | 'prototype' | 'voice'
+  type: 'chat' | 'prototype' | 'voice' | 'presentation-chat' | 'presentation-generate'
   // Claude
   input_tokens?: number
   output_tokens?: number
@@ -34,10 +37,11 @@ const ELEVENLABS_COST_PER_MINUTE = 0.07 // ~$0.07/min for Turbo v2.5
 const costs: CostEntry[] = []
 
 export function trackClaudeCost(
-  type: 'chat' | 'prototype',
+  type: 'chat' | 'prototype' | 'presentation-chat' | 'presentation-generate',
   inputTokens: number,
   outputTokens: number,
-  model: string
+  model: string,
+  sessionId?: string
 ): CostEntry {
   const pricing = CLAUDE_PRICING[model] || CLAUDE_PRICING.default
   const cost = (inputTokens * pricing.input + outputTokens * pricing.output) / 1_000_000
@@ -51,6 +55,7 @@ export function trackClaudeCost(
     model,
     claude_cost_usd: Math.round(cost * 10000) / 10000,
     total_cost_usd: Math.round(cost * 10000) / 10000,
+    session_id: sessionId,
   }
 
   costs.push(entry)
@@ -101,5 +106,22 @@ export function getCostSummary() {
       total_minutes: Math.round(voiceCosts.reduce((s, c) => s + (c.duration_seconds || 0), 0) / 60 * 100) / 100,
     },
     entries: costs.length,
+  }
+}
+
+export function getSessionCost(sessionId: string): { totalUsd: number; entries: CostEntry[] } {
+  const entries = costs.filter(c => c.session_id === sessionId)
+  const totalUsd = entries.reduce((s, c) => s + c.total_cost_usd, 0)
+  return { totalUsd: Math.round(totalUsd * 10000) / 10000, entries }
+}
+
+export function calculateSessionPrice(sessionId: string): { costUsd: number; priceUsd: number; priceCents: number } {
+  const { totalUsd } = getSessionCost(sessionId)
+  const priceUsd = totalUsd * PRICE_MULTIPLIER
+  const priceCents = Math.max(MIN_PRICE_CENTS, Math.round(priceUsd * 100))
+  return {
+    costUsd: totalUsd,
+    priceUsd: priceCents / 100,
+    priceCents,
   }
 }

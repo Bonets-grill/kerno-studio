@@ -97,6 +97,20 @@ export interface Translations {
   footer_copyright: string
   footer_made_with: string
   footer_in_canarias: string
+
+  // Presentations
+  pres_title: string
+  pres_subtitle: string
+  pres_chat_header: string
+  pres_chat_placeholder: string
+  pres_chat_empty_greeting: string
+  pres_chat_empty_instruction: string
+  pres_generate_btn: string
+  pres_pay_btn: string
+  pres_building_title: string
+  pres_pitch: string
+  pres_school: string
+  pres_proposal: string
 }
 
 export const T: Record<Lang, Translations> = {
@@ -213,6 +227,19 @@ export const T: Record<Lang, Translations> = {
     footer_copyright: 'Todos los derechos reservados.',
     footer_made_with: 'Hecho con',
     footer_in_canarias: 'en Canarias',
+
+    pres_title: 'Presentaciones premium con IA',
+    pres_subtitle: 'Describe tu idea y genera una presentación profesional en minutos',
+    pres_chat_header: 'Kerno Presentations — Describe tu presentación',
+    pres_chat_placeholder: 'Describe tu presentación...',
+    pres_chat_empty_greeting: '¿Qué presentación necesitas?',
+    pres_chat_empty_instruction: 'Pitch deck, trabajo escolar, propuesta comercial... describe tu idea.',
+    pres_generate_btn: 'Generar Presentación',
+    pres_pay_btn: 'Pagar y Descargar',
+    pres_building_title: 'Generando tu presentación...',
+    pres_pitch: 'Pitch Deck',
+    pres_school: 'Trabajo Académico',
+    pres_proposal: 'Propuesta Comercial',
   },
 
   en: {
@@ -328,6 +355,19 @@ export const T: Record<Lang, Translations> = {
     footer_copyright: 'All rights reserved.',
     footer_made_with: 'Made with',
     footer_in_canarias: 'in Canarias',
+
+    pres_title: "Presentaciones premium con IA",
+    pres_subtitle: "Describe tu idea y genera una presentación profesional en minutos",
+    pres_chat_header: "Kerno Presentations — Describe tu presentación",
+    pres_chat_placeholder: "Describe tu presentación...",
+    pres_chat_empty_greeting: "¿Qué presentación necesitas?",
+    pres_chat_empty_instruction: "Pitch deck, trabajo escolar, propuesta comercial... describe tu idea.",
+    pres_generate_btn: "Generar Presentación",
+    pres_pay_btn: "Pagar y Descargar",
+    pres_building_title: "Generando tu presentación...",
+    pres_pitch: "Pitch Deck",
+    pres_school: "Trabajo Académico",
+    pres_proposal: "Propuesta Comercial",
   },
 
   fr: {
@@ -443,6 +483,19 @@ export const T: Record<Lang, Translations> = {
     footer_copyright: 'Tous droits réservés.',
     footer_made_with: 'Fait avec',
     footer_in_canarias: 'aux Canaries',
+
+    pres_title: "Premium AI Presentations",
+    pres_subtitle: "Describe your idea and generate a professional presentation in minutes",
+    pres_chat_header: "Kerno Presentations — Describe your presentation",
+    pres_chat_placeholder: "Describe your presentation...",
+    pres_chat_empty_greeting: "What presentation do you need?",
+    pres_chat_empty_instruction: "Pitch deck, school project, business proposal... describe your idea.",
+    pres_generate_btn: "Generate Presentation",
+    pres_pay_btn: "Pay & Download",
+    pres_building_title: "Generating your presentation...",
+    pres_pitch: "Pitch Deck",
+    pres_school: "Academic Project",
+    pres_proposal: "Business Proposal",
   },
 
   de: {
@@ -558,6 +611,19 @@ export const T: Record<Lang, Translations> = {
     footer_copyright: 'Alle Rechte vorbehalten.',
     footer_made_with: 'Hergestellt mit',
     footer_in_canarias: 'auf den Kanaren',
+
+    pres_title: "Présentations premium avec IA",
+    pres_subtitle: "Décrivez votre idée et générez une présentation professionnelle en minutes",
+    pres_chat_header: "Kerno Presentations — Décrivez votre présentation",
+    pres_chat_placeholder: "Décrivez votre présentation...",
+    pres_chat_empty_greeting: "De quelle présentation avez-vous besoin ?",
+    pres_chat_empty_instruction: "Pitch deck, projet scolaire, proposition commerciale... décrivez votre idée.",
+    pres_generate_btn: "Générer la Présentation",
+    pres_pay_btn: "Payer et Télécharger",
+    pres_building_title: "Génération de votre présentation...",
+    pres_pitch: "Pitch Deck",
+    pres_school: "Projet Académique",
+    pres_proposal: "Proposition Commerciale",
   },
 
   it: {
@@ -673,6 +739,19 @@ export const T: Record<Lang, Translations> = {
     footer_copyright: 'Tutti i diritti riservati.',
     footer_made_with: 'Fatto con',
     footer_in_canarias: 'alle Canarie',
+
+    pres_title: "Premium KI-Präsentationen",
+    pres_subtitle: "Beschreiben Sie Ihre Idee und erstellen Sie in Minuten eine professionelle Präsentation",
+    pres_chat_header: "Kerno Presentations — Beschreiben Sie Ihre Präsentation",
+    pres_chat_placeholder: "Beschreiben Sie Ihre Präsentation...",
+    pres_chat_empty_greeting: "Welche Präsentation benötigen Sie?",
+    pres_chat_empty_instruction: "Pitch Deck, Schulprojekt, Geschäftsvorschlag... beschreiben Sie Ihre Idee.",
+    pres_generate_btn: "Präsentation erstellen",
+    pres_pay_btn: "Bezahlen & Herunterladen",
+    pres_building_title: "Ihre Präsentation wird erstellt...",
+    pres_pitch: "Pitch Deck",
+    pres_school: "Akademisches Projekt",
+    pres_proposal: "Geschäftsvorschlag",
   },
 
   pt: {
@@ -788,6 +867,19 @@ export const T: Record<Lang, Translations> = {
     footer_copyright: 'Todos os direitos reservados.',
     footer_made_with: 'Feito com',
     footer_in_canarias: 'nas Canárias',
+
+    pres_title: "Presentazioni premium con IA",
+    pres_subtitle: "Descrivi la tua idea e genera una presentazione professionale in pochi minuti",
+    pres_chat_header: "Kerno Presentations — Descrivi la tua presentazione",
+    pres_chat_placeholder: "Descrivi la tua presentazione...",
+    pres_chat_empty_greeting: "Di quale presentazione hai bisogno?",
+    pres_chat_empty_instruction: "Pitch deck, progetto scolastico, proposta commerciale... descrivi la tua idea.",
+    pres_generate_btn: "Genera Presentazione",
+    pres_pay_btn: "Paga e Scarica",
+    pres_building_title: "Generazione della presentazione...",
+    pres_pitch: "Pitch Deck",
+    pres_school: "Progetto Accademico",
+    pres_proposal: "Proposta Commerciale",
   },
 
   ca: {
@@ -903,6 +995,19 @@ export const T: Record<Lang, Translations> = {
     footer_copyright: 'Tots els drets reservats.',
     footer_made_with: 'Fet amb',
     footer_in_canarias: 'a Canàries',
+
+    pres_title: "Presentacions premium amb IA",
+    pres_subtitle: "Descriu la teva idea i genera una presentació professional en minuts",
+    pres_chat_header: "Kerno Presentations — Descriu la teva presentació",
+    pres_chat_placeholder: "Descriu la teva presentació...",
+    pres_chat_empty_greeting: "Quina presentació necessites?",
+    pres_chat_empty_instruction: "Pitch deck, treball escolar, proposta comercial... descriu la teva idea.",
+    pres_generate_btn: "Generar Presentació",
+    pres_pay_btn: "Pagar i Descarregar",
+    pres_building_title: "Generant la teva presentació...",
+    pres_pitch: "Pitch Deck",
+    pres_school: "Treball Acadèmic",
+    pres_proposal: "Proposta Comercial",
   },
 
   gl: {
@@ -1018,5 +1123,18 @@ export const T: Record<Lang, Translations> = {
     footer_copyright: 'Todos os dereitos reservados.',
     footer_made_with: 'Feito con',
     footer_in_canarias: 'en Canarias',
+
+    pres_title: "Presentacións premium con IA",
+    pres_subtitle: "Describe a túa idea e xera unha presentación profesional en minutos",
+    pres_chat_header: "Kerno Presentations — Describe a túa presentación",
+    pres_chat_placeholder: "Describe a túa presentación...",
+    pres_chat_empty_greeting: "Que presentación necesitas?",
+    pres_chat_empty_instruction: "Pitch deck, traballo escolar, proposta comercial... describe a túa idea.",
+    pres_generate_btn: "Xerar Presentación",
+    pres_pay_btn: "Pagar e Descargar",
+    pres_building_title: "Xerando a túa presentación...",
+    pres_pitch: "Pitch Deck",
+    pres_school: "Traballo Académico",
+    pres_proposal: "Proposta Comercial",
   },
 }

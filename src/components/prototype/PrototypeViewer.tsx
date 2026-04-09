@@ -53,29 +53,32 @@ export default function PrototypeViewer({ pages, projectName, onApprove, onReque
         </div>
       </div>
 
-      {/* Page tabs */}
-      <div className="px-6 py-2 border-b border-border flex gap-1 overflow-x-auto">
-        {pages.map((page, i) => (
-          <button
-            key={page.slug}
-            onClick={() => setCurrentPage(i)}
-            className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap transition-colors ${
-              i === currentPage
-                ? 'bg-neon-cyan/10 text-neon-cyan border border-neon-cyan/30'
-                : 'text-muted hover:text-foreground hover:bg-surface-3'
-            }`}
-          >
-            {page.name}
-          </button>
-        ))}
-      </div>
+      {/* Page tabs (hidden for single-page premium demos) */}
+      {pages.length > 1 && (
+        <div className="px-6 py-2 border-b border-border flex gap-1 overflow-x-auto">
+          {pages.map((page, i) => (
+            <button
+              key={page.slug}
+              onClick={() => setCurrentPage(i)}
+              className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap transition-colors ${
+                i === currentPage
+                  ? 'bg-neon-cyan/10 text-neon-cyan border border-neon-cyan/30'
+                  : 'text-muted hover:text-foreground hover:bg-surface-3'
+              }`}
+            >
+              {page.name}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Preview iframe */}
       <div className="flex justify-center bg-surface-3 p-4 min-h-[600px]">
         <div className={`${widthClass[viewMode]} max-w-full transition-all duration-300`}>
           <iframe
             srcDoc={pages[currentPage].html}
-            className="w-full h-[600px] rounded-lg border border-border bg-white"
+            className={`w-full rounded-lg border border-border ${pages.length === 1 ? 'h-[850px]' : 'h-[600px]'}`}
+            style={{ background: '#08090d' }}
             title={`Preview: ${pages[currentPage].name}`}
             sandbox="allow-scripts"
           />

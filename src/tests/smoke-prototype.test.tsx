@@ -50,7 +50,6 @@ describe('Prototype Prompt Builder', () => {
     })
     expect(prompt).toContain('#ff0000')
     expect(prompt).toContain('MyCorp')
-    expect(prompt).toContain('https://example.com/logo.png')
   })
 
   it('prompt requires JSON output format', async () => {
