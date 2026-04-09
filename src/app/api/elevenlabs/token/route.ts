@@ -12,7 +12,8 @@ export async function GET() {
   )
 
   if (!response.ok) {
-    return Response.json({ error: 'Failed to get token' }, { status: 500 })
+    // Fallback: return agent_id for direct connection
+    return Response.json({ agent_id: agentId })
   }
 
   const data = await response.json() as { signed_url: string }
