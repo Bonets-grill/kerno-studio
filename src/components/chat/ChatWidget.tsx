@@ -54,13 +54,72 @@ export default function ChatWidget() {
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const extractSummary = (text: string): ProjectSummary | null => {
+    // Try complete json:summary block
     const match = text.match(/```json:summary\n([\s\S]*?)```/)
-    if (!match) return null
-    try {
-      return JSON.parse(match[1]) as ProjectSummary
-    } catch {
-      return null
+    if (match) {
+      try {
+        return JSON.parse(match[1]) as ProjectSummary
+      } catch { /* try repair */ }
+
+      // Try to repair truncated JSON
+      try {
+        let json = match[1].trim()
+        // Close any unclosed arrays/objects
+        const opens = (json.match(/\[/g) || []).length - (json.match(/\]/g) || []).length
+        const braces = (json.match(/\{/g) || []).length - (json.match(/\}/g) || []).length
+        // Remove trailing comma
+        json = json.replace(/,\s*$/, '')
+        // Close unclosed strings
+        const quotes = (json.match(/"/g) || []).length
+        if (quotes % 2 !== 0) json += '"'
+        for (let i = 0; i < opens; i++) json += ']'
+        for (let i = 0; i < braces; i++) json += '}'
+        const parsed = JSON.parse(json) as ProjectSummary
+        // Ensure required fields
+        if (parsed.name && parsed.type) {
+          if (!parsed.total_price && parsed.estimated_modules?.length) {
+            parsed.total_price = parsed.estimated_modules.reduce((s, m) => s + (m.price || 0), 0)
+          }
+          if (!parsed.timeline_days && parsed.estimated_modules?.length) {
+            parsed.timeline_days = parsed.estimated_modules.reduce((s, m) => s + (m.days || 0), 0)
+          }
+          if (!parsed.features) parsed.features = []
+          if (!parsed.tech_requirements) parsed.tech_requirements = []
+          if (!parsed.estimated_modules) parsed.estimated_modules = []
+          return parsed
+        }
+      } catch { /* give up */ }
     }
+
+    // Try unclosed json:summary (no closing ```)
+    const unclosed = text.match(/```json:summary\n([\s\S]*)$/)
+    if (unclosed) {
+      try {
+        let json = unclosed[1].trim()
+        json = json.replace(/,\s*$/, '')
+        const quotes = (json.match(/"/g) || []).length
+        if (quotes % 2 !== 0) json += '"'
+        const opens = (json.match(/\[/g) || []).length - (json.match(/\]/g) || []).length
+        const braces = (json.match(/\{/g) || []).length - (json.match(/\}/g) || []).length
+        for (let i = 0; i < opens; i++) json += ']'
+        for (let i = 0; i < braces; i++) json += '}'
+        const parsed = JSON.parse(json) as ProjectSummary
+        if (parsed.name && parsed.type) {
+          if (!parsed.total_price && parsed.estimated_modules?.length) {
+            parsed.total_price = parsed.estimated_modules.reduce((s, m) => s + (m.price || 0), 0)
+          }
+          if (!parsed.timeline_days && parsed.estimated_modules?.length) {
+            parsed.timeline_days = parsed.estimated_modules.reduce((s, m) => s + (m.days || 0), 0)
+          }
+          if (!parsed.features) parsed.features = []
+          if (!parsed.tech_requirements) parsed.tech_requirements = []
+          if (!parsed.estimated_modules) parsed.estimated_modules = []
+          return parsed
+        }
+      } catch { /* give up */ }
+    }
+
+    return null
   }
 
   const cleanContent = (text: string): string => {
