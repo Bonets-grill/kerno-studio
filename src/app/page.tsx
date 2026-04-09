@@ -10,6 +10,7 @@ import CasesSection from '@/components/landing/CasesSection'
 import PricingSection from '@/components/landing/PricingSection'
 import ChatWidget from '@/components/chat/ChatWidget'
 import Footer from '@/components/landing/Footer'
+import PresentationsSection from '@/components/landing/PresentationsSection'
 import dynamic from 'next/dynamic'
 
 const SalesAgentDynamic = dynamic(
@@ -52,6 +53,7 @@ export default function Home() {
         <CasesSection />
         <PricingSection />
         <ChatWidget />
+        <PresentationsSection />
       </main>
       <Footer />
       <SalesAgentWrapper />
