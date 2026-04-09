@@ -113,6 +113,18 @@ function buildCustomization(summary: ProjectSummary, branding?: { primaryColor?:
     email: `info@${name.toLowerCase().replace(/\s+/g, '')}.com`,
   }
 
+  // Assign visual theme — each template type looks different
+  const themeMap: Record<string, 'executive' | 'neon' | 'warm' | 'minimal' | 'bold'> = {
+    restaurant: 'warm',
+    saas: 'neon',
+    generic: 'executive',
+  }
+  // Further vary within generic based on name hash
+  const genericThemes: ('executive' | 'minimal' | 'bold')[] = ['executive', 'minimal', 'bold']
+  const theme = templateId === 'generic'
+    ? genericThemes[name.split('').reduce((h, c) => h + c.charCodeAt(0), 0) % genericThemes.length]
+    : themeMap[templateId] || 'executive'
+
   return {
     templateId,
     businessName: name,
@@ -128,6 +140,7 @@ function buildCustomization(summary: ProjectSummary, branding?: { primaryColor?:
     features: summary.features,
     mockData,
     locale: 'es',
+    theme,
   }
 }
 

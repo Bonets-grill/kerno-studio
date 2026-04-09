@@ -17,6 +17,7 @@ export interface TemplateCustomization {
   features: string[]
   mockData: Record<string, unknown>
   locale: string
+  theme?: 'executive' | 'neon' | 'warm' | 'minimal' | 'bold'
 }
 
 export interface ModuleDisplay {

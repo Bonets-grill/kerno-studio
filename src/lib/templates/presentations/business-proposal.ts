@@ -236,7 +236,7 @@ export const businessProposalTemplate: PresentationTemplateDefinition = {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${c.title} — Propuesta Comercial</title>
-<style>${designSystemCSS(c.primaryColor, c.accentColor)}</style>
+<style>${designSystemCSS(c.primaryColor, c.accentColor, 'bold')}</style>
 </head>
 <body>
 ${nav}

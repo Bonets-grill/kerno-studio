@@ -190,7 +190,7 @@ export const schoolProjectTemplate: PresentationTemplateDefinition = {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${c.title} — Presentación Académica</title>
-<style>${designSystemCSS(c.primaryColor, c.accentColor)}</style>
+<style>${designSystemCSS(c.primaryColor, c.accentColor, 'minimal')}</style>
 </head>
 <body>
 ${nav}

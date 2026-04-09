@@ -4,14 +4,106 @@
  * Inspired by the Sigfredo AI Demo — glassmorphism, dark theme, Inter font, premium animations.
  */
 
-export function designSystemCSS(primary: string, accent: string): string {
+export type VisualTheme = 'executive' | 'neon' | 'warm' | 'minimal' | 'bold'
+
+interface ThemeConfig {
+  font: string
+  fontImport: string
+  bg: string
+  bgElevated: string
+  bgCard: string
+  bgCardHover: string
+  text: string
+  textMuted: string
+  textDim: string
+  borderStyle: string
+  borderLight: string
+  cardRadius: string
+  cardBorder: string
+  cardShadow: string
+  navStyle: string
+  heroAlign: string
+  heroTitleSize: string
+  badgeRadius: string
+  buttonRadius: string
+  kpiStyle: string
+}
+
+const THEMES: Record<VisualTheme, ThemeConfig> = {
+  executive: {
+    font: "'DM Sans', sans-serif",
+    fontImport: "https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&display=swap",
+    bg: '#0c0f14', bgElevated: '#121620', bgCard: '#161b28', bgCardHover: '#1c2233',
+    text: '#e4e7f0', textMuted: '#7a82a0', textDim: '#4e5470',
+    borderStyle: 'rgba(255,255,255,0.06)', borderLight: 'rgba(255,255,255,0.1)',
+    cardRadius: '20px', cardBorder: '1px solid rgba(255,255,255,0.06)',
+    cardShadow: '0 4px 30px rgba(0,0,0,0.2)',
+    navStyle: 'border-bottom', heroAlign: 'left', heroTitleSize: 'clamp(2.4rem, 5vw, 3.6rem)',
+    badgeRadius: '8px', buttonRadius: '14px', kpiStyle: 'border-left: 3px solid var(--primary)',
+  },
+  neon: {
+    font: "'Space Grotesk', sans-serif",
+    fontImport: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap",
+    bg: '#050508', bgElevated: '#0a0a12', bgCard: '#0f0f1a', bgCardHover: '#14142a',
+    text: '#eef0ff', textMuted: '#6670a0', textDim: '#3e4570',
+    borderStyle: 'rgba(255,255,255,0.08)', borderLight: 'rgba(255,255,255,0.14)',
+    cardRadius: '12px', cardBorder: '1px solid rgba(255,255,255,0.08)',
+    cardShadow: 'none',
+    navStyle: 'glow-bottom', heroAlign: 'center', heroTitleSize: 'clamp(2.8rem, 7vw, 5rem)',
+    badgeRadius: '100px', buttonRadius: '12px', kpiStyle: '',
+  },
+  warm: {
+    font: "'Poppins', sans-serif",
+    fontImport: "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap",
+    bg: '#0f0d0a', bgElevated: '#171410', bgCard: '#1e1a14', bgCardHover: '#25201a',
+    text: '#f0ece4', textMuted: '#8a8070', textDim: '#5a5040',
+    borderStyle: 'rgba(255,220,180,0.08)', borderLight: 'rgba(255,220,180,0.14)',
+    cardRadius: '24px', cardBorder: 'none',
+    cardShadow: '0 8px 40px rgba(0,0,0,0.25)',
+    navStyle: 'floating', heroAlign: 'center', heroTitleSize: 'clamp(2.6rem, 6vw, 4rem)',
+    badgeRadius: '12px', buttonRadius: '100px', kpiStyle: '',
+  },
+  minimal: {
+    font: "'Inter', sans-serif",
+    fontImport: "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap",
+    bg: '#0a0a0e', bgElevated: '#101014', bgCard: '#16161c', bgCardHover: '#1c1c24',
+    text: '#d8dae0', textMuted: '#70727e', textDim: '#484a56',
+    borderStyle: 'rgba(255,255,255,0.05)', borderLight: 'rgba(255,255,255,0.08)',
+    cardRadius: '8px', cardBorder: '1px solid rgba(255,255,255,0.05)',
+    cardShadow: 'none',
+    navStyle: 'thin', heroAlign: 'center', heroTitleSize: 'clamp(2rem, 4vw, 3rem)',
+    badgeRadius: '4px', buttonRadius: '8px', kpiStyle: '',
+  },
+  bold: {
+    font: "'Sora', sans-serif",
+    fontImport: "https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap",
+    bg: '#08060e', bgElevated: '#0e0c16', bgCard: '#141220', bgCardHover: '#1a182c',
+    text: '#f0ecff', textMuted: '#7e78a0', textDim: '#504a70',
+    borderStyle: 'rgba(200,180,255,0.08)', borderLight: 'rgba(200,180,255,0.14)',
+    cardRadius: '16px', cardBorder: '2px solid rgba(200,180,255,0.06)',
+    cardShadow: '0 2px 20px rgba(100,80,200,0.08)',
+    navStyle: 'border-bottom', heroAlign: 'center', heroTitleSize: 'clamp(3rem, 7vw, 5rem)',
+    badgeRadius: '100px', buttonRadius: '16px', kpiStyle: '',
+  },
+}
+
+export function designSystemCSS(primary: string, accent: string, theme: VisualTheme = 'neon'): string {
+  const t = THEMES[theme]
   // Derive lighter/darker variants from hex
   const primaryLight = lightenHex(primary, 25)
   const primaryDark = darkenHex(primary, 20)
   const accentLight = lightenHex(accent, 20)
 
+  const navCSS = t.navStyle === 'floating'
+    ? `background: rgba(15,13,10,0.7); border-radius: 16px; margin: 10px 2rem 0; border: 1px solid ${t.borderStyle};`
+    : t.navStyle === 'thin'
+    ? `background: ${t.bg}; border-bottom: 1px solid ${t.borderStyle}; height: 48px;`
+    : t.navStyle === 'glow-bottom'
+    ? `background: rgba(5,5,8,0.92); border-bottom: 1px solid rgba(${hexToRgb(primary)},0.15); box-shadow: 0 2px 20px rgba(${hexToRgb(primary)},0.05);`
+    : `background: rgba(12,15,20,0.9); border-bottom: 1px solid ${t.borderStyle};`
+
   return `
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('${t.fontImport}');
 
 :root {
   --primary: ${primary};
@@ -19,15 +111,15 @@ export function designSystemCSS(primary: string, accent: string): string {
   --primary-dark: ${primaryDark};
   --accent: ${accent};
   --accent-light: ${accentLight};
-  --bg: #08090d;
-  --bg-elevated: #0e1017;
-  --bg-card: #12141c;
-  --bg-card-hover: #181a24;
-  --text: #e6e8f0;
-  --text-muted: #6e7190;
-  --text-dim: #4a4d65;
-  --border: rgba(255,255,255,0.07);
-  --border-light: rgba(255,255,255,0.12);
+  --bg: ${t.bg};
+  --bg-elevated: ${t.bgElevated};
+  --bg-card: ${t.bgCard};
+  --bg-card-hover: ${t.bgCardHover};
+  --text: ${t.text};
+  --text-muted: ${t.textMuted};
+  --text-dim: ${t.textDim};
+  --border: ${t.borderStyle};
+  --border-light: ${t.borderLight};
   --success: #22c55e;
   --warning: #f59e0b;
   --danger: #ef4444;
@@ -37,7 +129,7 @@ export function designSystemCSS(primary: string, accent: string): string {
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: ${t.font};
   background: var(--bg);
   color: var(--text);
   overflow-x: hidden;
@@ -45,12 +137,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ═══════════ GLASSMORPHISM NAV ═══════════ */
+/* ═══════════ NAV ═══════════ */
 .nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-  background: rgba(8,9,13,0.88);
+  ${navCSS}
   backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border);
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 2rem; height: 56px;
 }
@@ -99,8 +190,11 @@ body {
 
 /* ═══════════ HERO ═══════════ */
 .hero-wrap {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  text-align: center; min-height: calc(100vh - 76px); position: relative;
+  display: flex; flex-direction: column;
+  align-items: ${t.heroAlign === 'left' ? 'flex-start' : 'center'};
+  justify-content: center;
+  text-align: ${t.heroAlign};
+  min-height: calc(100vh - 76px); position: relative;
 }
 .hero-wrap::before {
   content: ''; position: absolute; top: -30%; left: -30%; width: 160%; height: 160%;
@@ -131,7 +225,7 @@ body {
 }
 .hero-h1 {
   position: relative; z-index: 1;
-  font-size: clamp(2.8rem, 7vw, 4.5rem); font-weight: 900; line-height: 1.05;
+  font-size: ${t.heroTitleSize}; font-weight: 900; line-height: 1.05;
   margin-bottom: 1rem;
   background: linear-gradient(135deg, #fff 0%, var(--primary-light) 50%, var(--accent) 100%);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
@@ -144,7 +238,7 @@ body {
   position: relative; z-index: 1;
   display: inline-flex; align-items: center; justify-content: center;
   padding: 14px 32px; background: linear-gradient(135deg, var(--primary), var(--primary-light));
-  color: white; font-size: 0.9rem; font-weight: 700; border-radius: 12px;
+  color: white; font-size: 0.9rem; font-weight: 700; border-radius: ${t.buttonRadius};
   border: none; cursor: pointer; transition: all 0.3s;
   box-shadow: 0 4px 24px rgba(${hexToRgb(primary)},0.3);
 }
@@ -153,7 +247,7 @@ body {
   position: relative; z-index: 1;
   display: inline-flex; align-items: center; justify-content: center;
   padding: 14px 32px; background: linear-gradient(135deg, var(--accent), ${darkenHex(accent, 15)});
-  color: var(--bg); font-size: 0.9rem; font-weight: 700; border-radius: 12px;
+  color: var(--bg); font-size: 0.9rem; font-weight: 700; border-radius: ${t.buttonRadius};
   border: none; cursor: pointer; transition: all 0.3s;
   box-shadow: 0 4px 24px rgba(${hexToRgb(accent)},0.25);
 }
@@ -170,8 +264,9 @@ body {
 
 /* ═══════════ CARDS ═══════════ */
 .card {
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: 16px; padding: 1.5rem; transition: all 0.3s;
+  background: var(--bg-card); ${t.cardBorder};
+  border-radius: ${t.cardRadius}; padding: 1.5rem; transition: all 0.3s;
+  ${t.cardShadow !== 'none' ? `box-shadow: ${t.cardShadow};` : ''}
 }
 .card:hover { border-color: rgba(${hexToRgb(primary)},0.3); background: var(--bg-card-hover); }
 .card-header {
@@ -183,8 +278,10 @@ body {
 /* ═══════════ KPI CARDS ═══════════ */
 .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
 .kpi {
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: 14px; padding: 1.2rem; transition: all 0.3s;
+  background: var(--bg-card); ${t.cardBorder};
+  border-radius: ${t.cardRadius}; padding: 1.2rem; transition: all 0.3s;
+  ${t.kpiStyle}
+  ${t.cardShadow !== 'none' ? `box-shadow: ${t.cardShadow};` : ''}
 }
 .kpi:hover { border-color: rgba(${hexToRgb(primary)},0.3); }
 .kpi-icon { font-size: 1.4rem; margin-bottom: 0.5rem; }
@@ -196,7 +293,7 @@ body {
 .kpi-trend.neutral { color: var(--text-muted); }
 
 /* ═══════════ BADGES ═══════════ */
-.badge { padding: 3px 10px; border-radius: 100px; font-size: 0.66rem; font-weight: 600; }
+.badge { padding: 3px 10px; border-radius: ${t.badgeRadius}; font-size: 0.66rem; font-weight: 600; }
 .badge-green { background: rgba(34,197,94,0.12); color: var(--success); }
 .badge-yellow { background: rgba(245,158,11,0.12); color: var(--warning); }
 .badge-red { background: rgba(239,68,68,0.12); color: var(--danger); }
@@ -356,7 +453,7 @@ body {
 .btn-save {
   padding: 10px 28px; background: linear-gradient(135deg, var(--primary), var(--primary-light));
   color: white; font-weight: 700; font-size: 0.85rem; border: none;
-  border-radius: 10px; cursor: pointer; transition: all 0.3s;
+  border-radius: ${t.buttonRadius}; cursor: pointer; transition: all 0.3s;
 }
 .btn-save:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(${hexToRgb(primary)},0.3); }
 

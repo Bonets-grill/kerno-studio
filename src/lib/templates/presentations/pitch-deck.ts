@@ -254,7 +254,7 @@ export const pitchDeckTemplate: PresentationTemplateDefinition = {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${c.title} — Pitch Deck</title>
-<style>${designSystemCSS(c.primaryColor, c.accentColor)}</style>
+<style>${designSystemCSS(c.primaryColor, c.accentColor, 'executive')}</style>
 </head>
 <body>
 ${nav}

@@ -113,7 +113,7 @@ describe('Design System CSS', () => {
     const css = designSystemCSS('#1a5c38', '#d4a843')
     expect(css).toContain('--primary: #1a5c38')
     expect(css).toContain('--accent: #d4a843')
-    expect(css).toContain('Inter')
+    expect(css).toContain('fonts.googleapis.com')
     expect(css).toContain('.nav')
     expect(css).toContain('.hero-wrap')
     expect(css).toContain('.kpi-grid')
