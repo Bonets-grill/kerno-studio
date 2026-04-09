@@ -16,7 +16,7 @@ export async function POST(req: Request) {
   try {
     const stream = claude.messages.stream({
       model,
-      max_tokens: 16000,
+      max_tokens: 8192,
       messages: [
         {
           role: 'user',
