@@ -18,11 +18,14 @@ export default function ChatWidget() {
   const [loading, setLoading] = useState(false)
   const [streamingText, setStreamingText] = useState('')
   const [summary, setSummary] = useState<ProjectSummary | null>(null)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const container = messagesContainerRef.current
+    if (container) {
+      container.scrollTop = container.scrollHeight
+    }
   }, [])
 
   useEffect(() => {
@@ -137,7 +140,7 @@ export default function ChatWidget() {
           </div>
 
           {/* Messages */}
-          <div className="p-6 min-h-[350px] max-h-[500px] overflow-y-auto space-y-4">
+          <div ref={messagesContainerRef} className="p-6 min-h-[350px] max-h-[500px] overflow-y-auto space-y-4">
             {messages.length === 0 && !loading && (
               <div className="text-center text-muted py-12">
                 <p className="text-lg mb-2">{t.chat_empty_greeting}</p>
@@ -185,7 +188,6 @@ export default function ChatWidget() {
               </div>
             )}
 
-            <div ref={messagesEndRef} />
           </div>
 
           {/* Summary card */}

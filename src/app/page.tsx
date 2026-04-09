@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { I18nProvider } from '@/lib/i18n/context'
 import Navbar from '@/components/landing/Navbar'
 import HeroSection from '@/components/landing/HeroSection'
@@ -11,6 +12,10 @@ import ChatWidget from '@/components/chat/ChatWidget'
 import Footer from '@/components/landing/Footer'
 
 export default function Home() {
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
+
   return (
     <I18nProvider>
       <Navbar />
