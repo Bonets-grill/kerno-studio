@@ -9,8 +9,29 @@ export const maxDuration = 60
 
 // ── Deterministic template selection — NO Claude dependency ──
 
-const RESTAURANT_KEYWORDS = ['restaurant', 'restaurante', 'bar', 'café', 'cafe', 'pizz', 'hostel', 'hotel', 'comida', 'food', 'cocina', 'kitchen', 'menu', 'menú', 'reserva', 'catering']
+const RESTAURANT_KEYWORDS = ['restaurant', 'restaurante', 'bar ', 'café', 'cafe', 'pizz', 'hostelería', 'hotel', 'comida', 'food', 'cocina', 'kitchen', 'carta digital', 'menú digital', 'catering', 'gastronom']
 const SAAS_KEYWORDS = ['saas', 'platform', 'plataforma', 'software', 'app', 'dashboard', 'api', 'crm', 'erp', 'startup', 'fintech', 'marketplace', 'subscription', 'suscripción']
+
+// Color palettes per industry for variety
+const COLOR_PALETTES: Record<string, { primary: string; accent: string }[]> = {
+  restaurant: [
+    { primary: '#1a5c38', accent: '#d4a843' },
+    { primary: '#8b2500', accent: '#f0c040' },
+    { primary: '#2d3e50', accent: '#e67e22' },
+  ],
+  saas: [
+    { primary: '#6366f1', accent: '#f59e0b' },
+    { primary: '#0ea5e9', accent: '#22c55e' },
+    { primary: '#8b5cf6', accent: '#ec4899' },
+  ],
+  generic: [
+    { primary: '#3b82f6', accent: '#f59e0b' },
+    { primary: '#059669', accent: '#d97706' },
+    { primary: '#7c3aed', accent: '#06b6d4' },
+    { primary: '#dc2626', accent: '#fbbf24' },
+    { primary: '#0891b2', accent: '#f97316' },
+  ],
+}
 
 function selectTemplateId(summary: ProjectSummary): string {
   const text = `${summary.name} ${summary.description} ${summary.features.join(' ')} ${summary.type}`.toLowerCase()
@@ -19,15 +40,85 @@ function selectTemplateId(summary: ProjectSummary): string {
   return 'generic'
 }
 
+function pickColors(templateId: string, name: string): { primary: string; accent: string } {
+  const palettes = COLOR_PALETTES[templateId] || COLOR_PALETTES.generic
+  // Use name hash to pick a consistent but varied palette
+  const hash = name.split('').reduce((h, c) => h + c.charCodeAt(0), 0)
+  return palettes[hash % palettes.length]
+}
+
 function buildCustomization(summary: ProjectSummary, branding?: { primaryColor?: string; companyName?: string }): TemplateCustomization {
   const templateId = selectTemplateId(summary)
-  const icons = ['🚀', '📊', '🔗', '💡', '🛡️', '⚙️', '📱', '🎯']
+  const name = branding?.companyName || summary.name
+  const colors = pickColors(templateId, name)
+  const primary = branding?.primaryColor || colors.primary
+  const accent = colors.accent
+
+  // Industry-specific icons
+  const iconSets: Record<string, string[]> = {
+    restaurant: ['🍽️', '📋', '💬', '⭐', '📊', '📧', '🎂', '🍷'],
+    saas: ['📊', '👥', '🔗', '🤖', '⚡', '🎨', '💳', '🔐'],
+    generic: ['🚀', '📊', '🔗', '💡', '🛡️', '⚙️', '📱', '🎯'],
+  }
+  const icons = iconSets[templateId] || iconSets.generic
+
+  // Build personalized mock data from the summary
+  const featureList = summary.features.length > 0 ? summary.features : ['Módulo principal']
+  const moduleList = summary.estimated_modules.length > 0 ? summary.estimated_modules : [{ name: 'Core', description: 'Funcionalidad principal', price: 500, days: 5 }]
+
+  const mockData: Record<string, unknown> = {
+    heroTagline: `${name} — ${summary.description.split('.')[0]}`,
+    heroSubtitle: summary.features.slice(0, 3).join(' · '),
+    revenue: summary.total_price * 3,
+    activeUsers: 200 + Math.floor(summary.total_price / 10),
+    pendingTasks: moduleList.length * 3,
+    efficiency: 85 + (moduleList.length % 10),
+    // Personalize alerts with actual features
+    alert1: `${featureList[0]} — 3 tareas pendientes de configuración`,
+    alert2: `Objetivo de ${featureList[1] || featureList[0]} alcanzado al 87%`,
+    alert3: `Backup automático de ${name} completado`,
+    alert4: `Renovación del módulo ${moduleList[0].name} en 15 días`,
+    // Personalize metrics
+    metric1Label: featureList[0] || 'Rendimiento',
+    metric1: 88,
+    metric2Label: featureList[1] || 'Eficiencia',
+    metric2: 75,
+    metric3Label: featureList[2] || 'Satisfacción',
+    metric3: 92,
+    metric4Label: 'Retención',
+    metric4: 82,
+    // Personalize table with actual modules
+    tableRows: moduleList.map((m, i) => ({
+      id: `#${1042 - i}`,
+      name: m.name,
+      status: i === 0 ? '<span class="badge badge-green">Activo</span>' : i === 1 ? '<span class="badge badge-yellow">En curso</span>' : '<span class="badge badge-blue">Revisión</span>',
+      date: `0${9 - i}/04/2026`,
+      value: `€${m.price.toLocaleString()}`,
+    })),
+    // Personalize WhatsApp with business context
+    waMessages: [
+      { from: 'client', text: `Hola, necesito información sobre ${featureList[0]}`, time: '10:23' },
+      { from: 'bot', text: `¡Hola! Soy el asistente de ${name}. Te ayudo encantado. ¿Qué necesitas exactamente?`, time: '10:23' },
+      { from: 'client', text: `Quiero saber el estado de ${featureList[1] || 'mi solicitud'}`, time: '10:24' },
+      { from: 'bot', text: `📋 ${featureList[1] || 'Tu solicitud'} está activa y en progreso. ¿Necesitas algo más?`, time: '10:24' },
+      { from: 'client', text: 'Perfecto, gracias! 👍', time: '10:25' },
+      { from: 'bot', text: `¡De nada! Estoy aquí 24/7 para ${name}. 😊`, time: '10:25' },
+    ],
+    // Personalize big result
+    bigResultValue: `€${(summary.total_price * 12).toLocaleString()}`,
+    bigResultLabel: `Valor proyectado anual de ${name}`,
+    bigItem1: `${moduleList.length} módulos`,
+    bigItem2: `${summary.timeline_days} días`,
+    bigItem3: `${summary.features.length} features`,
+    email: `info@${name.toLowerCase().replace(/\s+/g, '')}.com`,
+  }
+
   return {
     templateId,
-    businessName: branding?.companyName || summary.name,
+    businessName: name,
     businessType: summary.type === 'saas' ? 'Plataforma SaaS' : summary.type === 'system' ? 'Sistema' : summary.type === 'mvp' ? 'MVP' : 'Landing',
-    primaryColor: branding?.primaryColor || '#00f0ff',
-    accentColor: '#f0a000',
+    primaryColor: primary,
+    accentColor: accent,
     modules: summary.estimated_modules.map((m, i) => ({
       name: m.name,
       description: m.description,
@@ -35,7 +126,7 @@ function buildCustomization(summary: ProjectSummary, branding?: { primaryColor?:
       status: 'active' as const,
     })),
     features: summary.features,
-    mockData: {},
+    mockData,
     locale: 'es',
   }
 }
