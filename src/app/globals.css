@@ -82,6 +82,26 @@ body {
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* PWA native feel */
+body {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  overscroll-behavior-y: none;
+}
+
+/* Safe areas for notched devices */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Native-like scrolling containers */
+.scroll-native {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
 }
 
 /* Selection */

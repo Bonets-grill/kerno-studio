@@ -10,6 +10,7 @@ import CasesSection from '@/components/landing/CasesSection'
 import PricingSection from '@/components/landing/PricingSection'
 import ChatWidget from '@/components/chat/ChatWidget'
 import Footer from '@/components/landing/Footer'
+import SalesAgent from '@/components/chat/SalesAgent'
 
 export default function Home() {
   useEffect(() => {
@@ -28,6 +29,9 @@ export default function Home() {
         <ChatWidget />
       </main>
       <Footer />
+      {process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID && (
+        <SalesAgent agentId={process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID} />
+      )}
     </I18nProvider>
   )
 }
