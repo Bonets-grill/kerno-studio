@@ -162,7 +162,7 @@ describe('SummaryCard Component', () => {
   it('renders action buttons', async () => {
     const SummaryCard = (await import('@/components/chat/SummaryCard')).default
     render(<SummaryCard summary={mockSummary} />)
-    expect(screen.getByText('Me gusta, continuar')).toBeInTheDocument()
+    expect(screen.getByText('Me gusta, ver prototipo')).toBeInTheDocument()
     expect(screen.getByText('Cambiar cosas')).toBeInTheDocument()
   })
 })

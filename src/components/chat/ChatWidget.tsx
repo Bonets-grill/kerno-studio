@@ -2,9 +2,10 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useI18n } from '@/lib/i18n/context'
-import type { ProjectSummary } from '@/types/database'
+import type { ProjectSummary, PrototypePage } from '@/types/database'
 import VoiceButton from './VoiceButton'
 import SummaryCard from './SummaryCard'
+import PrototypeViewer from '@/components/prototype/PrototypeViewer'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -18,6 +19,9 @@ export default function ChatWidget() {
   const [loading, setLoading] = useState(false)
   const [streamingText, setStreamingText] = useState('')
   const [summary, setSummary] = useState<ProjectSummary | null>(null)
+  const [generatingPrototype, setGeneratingPrototype] = useState(false)
+  const [prototypePages, setPrototypePages] = useState<PrototypePage[]>([])
+  const [prototypeError, setPrototypeError] = useState<string | null>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -93,7 +97,6 @@ export default function ChatWidget() {
         }
       }
 
-      // Check for summary
       const extracted = extractSummary(fullText)
       if (extracted) setSummary(extracted)
 
@@ -112,6 +115,39 @@ export default function ChatWidget() {
     }
   }
 
+  const handleGeneratePrototype = async () => {
+    if (!summary) return
+    setGeneratingPrototype(true)
+    setPrototypeError(null)
+
+    try {
+      const response = await fetch('/api/prototype', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          summary,
+          branding: { companyName: summary.name, primaryColor: '#00f0ff' },
+        }),
+      })
+
+      if (!response.ok) throw new Error('Prototype generation failed')
+
+      const data = await response.json() as { pages: PrototypePage[] }
+      setPrototypePages(data.pages)
+    } catch {
+      setPrototypeError('Error generando el prototipo. Inténtalo de nuevo.')
+    } finally {
+      setGeneratingPrototype(false)
+    }
+  }
+
+  const handleRequestChanges = () => {
+    setSummary(null)
+    setPrototypePages([])
+    setPrototypeError(null)
+    inputRef.current?.focus()
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     sendMessage(input)
@@ -120,6 +156,36 @@ export default function ChatWidget() {
   const handleVoiceResult = (transcript: string) => {
     setInput(transcript)
     sendMessage(transcript)
+  }
+
+  // Show prototype viewer if pages are generated
+  if (prototypePages.length > 0 && summary) {
+    return (
+      <section id="chat" className="py-32 px-6 bg-surface">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+              Tu <span className="gradient-text">prototipo</span>
+            </h2>
+            <p className="text-muted text-lg">
+              {summary.name} — {prototypePages.length} pantallas generadas con IA
+            </p>
+          </div>
+
+          <PrototypeViewer
+            pages={prototypePages}
+            projectName={summary.name}
+            onApprove={() => {
+              const section = document.getElementById('chat')
+              if (section) {
+                section.innerHTML = '<div class="py-32 px-6 text-center"><div class="max-w-md mx-auto"><div class="w-20 h-20 rounded-full bg-neon-green/20 flex items-center justify-center mx-auto mb-6"><svg class="w-10 h-10 text-neon-green" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></div><h2 class="text-3xl font-bold mb-3">Prototipo aprobado</h2><p class="text-muted">Te contactaremos pronto para iniciar el desarrollo. Recibirás un email con los próximos pasos y el enlace de pago.</p></div></div>'
+              }
+            }}
+            onRequestChanges={handleRequestChanges}
+          />
+        </div>
+      </section>
+    )
   }
 
   return (
@@ -187,11 +253,24 @@ export default function ChatWidget() {
                 </div>
               </div>
             )}
-
           </div>
 
           {/* Summary card */}
-          {summary && <SummaryCard summary={summary} />}
+          {summary && (
+            <SummaryCard
+              summary={summary}
+              onApprove={handleGeneratePrototype}
+              onRequestChanges={handleRequestChanges}
+              loading={generatingPrototype}
+            />
+          )}
+
+          {/* Prototype error */}
+          {prototypeError && (
+            <div className="mx-6 mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+              {prototypeError}
+            </div>
+          )}
 
           {/* Input */}
           <form onSubmit={handleSubmit} className="p-4 border-t border-border">
@@ -202,13 +281,13 @@ export default function ChatWidget() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder={t.chat_placeholder}
-                disabled={loading}
+                disabled={loading || generatingPrototype}
                 className="flex-1 px-4 py-3 rounded-xl bg-surface-3 border border-border text-foreground placeholder:text-muted/50 focus:outline-none focus:border-neon-cyan/50 transition-colors disabled:opacity-50"
               />
-              <VoiceButton onResult={handleVoiceResult} disabled={loading} />
+              <VoiceButton onResult={handleVoiceResult} disabled={loading || generatingPrototype} />
               <button
                 type="submit"
-                disabled={!input.trim() || loading}
+                disabled={!input.trim() || loading || generatingPrototype}
                 className="px-6 py-3 rounded-xl bg-gradient-to-r from-neon-cyan to-neon-green text-black font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
               >
                 {t.chat_send}
