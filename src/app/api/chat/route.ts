@@ -1,13 +1,16 @@
 import { claude } from '@/lib/claude'
 import { CHAT_SYSTEM_PROMPT } from '@/lib/chat-system-prompt'
+import { trackClaudeCost } from '@/lib/cost-tracker'
 
 export async function POST(req: Request) {
   const { messages } = await req.json() as {
     messages: { role: 'user' | 'assistant'; content: string }[]
   }
 
+  const model = 'claude-sonnet-4-20250514'
+
   const stream = claude.messages.stream({
-    model: 'claude-sonnet-4-20250514',
+    model,
     max_tokens: 1024,
     system: CHAT_SYSTEM_PROMPT,
     messages: messages.map((m) => ({
@@ -29,6 +32,13 @@ export async function POST(req: Request) {
           )
         }
       }
+
+      // Track cost from final message
+      try {
+        const finalMessage = await stream.finalMessage()
+        trackClaudeCost('chat', finalMessage.usage.input_tokens, finalMessage.usage.output_tokens, model)
+      } catch { /* skip tracking on error */ }
+
       controller.enqueue(encoder.encode('data: [DONE]\n\n'))
       controller.close()
     },

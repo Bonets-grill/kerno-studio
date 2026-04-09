@@ -1,5 +1,6 @@
 import { claude } from '@/lib/claude'
 import { buildPrototypePrompt } from '@/lib/prototype-prompt'
+import { trackClaudeCost } from '@/lib/cost-tracker'
 import type { ProjectSummary } from '@/types/database'
 
 export const maxDuration = 60
@@ -10,9 +11,11 @@ export async function POST(req: Request) {
     branding?: { primaryColor?: string; logo?: string; companyName?: string }
   }
 
+  const model = 'claude-sonnet-4-20250514'
+
   try {
     const stream = claude.messages.stream({
-      model: 'claude-sonnet-4-20250514',
+      model,
       max_tokens: 16000,
       messages: [
         {
@@ -35,6 +38,13 @@ export async function POST(req: Request) {
             )
           }
         }
+
+        // Track cost
+        try {
+          const finalMessage = await stream.finalMessage()
+          trackClaudeCost('prototype', finalMessage.usage.input_tokens, finalMessage.usage.output_tokens, model)
+        } catch { /* skip */ }
+
         controller.enqueue(encoder.encode('data: [DONE]\n\n'))
         controller.close()
       },
