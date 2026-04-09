@@ -42,8 +42,9 @@ export default function HeroSection() {
           className="text-lg md:text-xl text-muted max-w-2xl mx-auto mb-10 font-[family-name:var(--font-inter)]"
         >
           {t.hero_description}{' '}
-          <span className="text-foreground font-medium">{t.hero_description_free}</span>. Si te gusta,
-          nuestro equipo lo construye.
+          <span className="text-foreground font-medium">{t.hero_description_free}</span>.{' '}
+          Sistemas, apps, SaaS y{' '}
+          <span className="text-neon-green font-medium">presentaciones premium con IA</span>.
         </motion.p>
 
         <motion.div

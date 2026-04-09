@@ -68,7 +68,7 @@ describe('ChatWidget Component', () => {
   it('renders input and send button', async () => {
     const ChatWidget = (await import('@/components/chat/ChatWidget')).default
     render(<ChatWidget />, { wrapper: TestWrapper })
-    expect(screen.getByPlaceholderText(/Describe tu proyecto/)).toBeInTheDocument()
+    expect(screen.getByPlaceholderText(/sistema para mi/i)).toBeInTheDocument()
     expect(screen.getByText('Enviar')).toBeInTheDocument()
   })
 
@@ -81,7 +81,7 @@ describe('ChatWidget Component', () => {
   it('allows typing and enables send', async () => {
     const ChatWidget = (await import('@/components/chat/ChatWidget')).default
     render(<ChatWidget />, { wrapper: TestWrapper })
-    const input = screen.getByPlaceholderText(/Describe tu proyecto/)
+    const input = screen.getByPlaceholderText(/sistema para mi/i)
     fireEvent.change(input, { target: { value: 'Quiero un CRM' } })
     expect(screen.getByText('Enviar')).not.toBeDisabled()
   })

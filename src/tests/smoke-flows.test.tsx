@@ -77,7 +77,7 @@ describe('Flow: Chat Conversation', () => {
     expect(screen.getByText(/soy el asistente/)).toBeInTheDocument()
 
     // 2. Type message
-    const input = screen.getByPlaceholderText(/Describe tu proyecto/)
+    const input = screen.getByPlaceholderText(/restaurante.*pitch|pitch.*restaurante|sistema para mi/i)
     fireEvent.change(input, { target: { value: 'Necesito una app para mi restaurante' } })
 
     // 3. Send
@@ -111,7 +111,7 @@ describe('Flow: Chat Conversation', () => {
     expect(sendBtn).toBeDisabled()
 
     // Type spaces only
-    const input = screen.getByPlaceholderText(/Describe tu proyecto/)
+    const input = screen.getByPlaceholderText(/restaurante.*pitch|pitch.*restaurante|sistema para mi/i)
     fireEvent.change(input, { target: { value: '   ' } })
     expect(sendBtn).toBeDisabled()
   })
@@ -120,7 +120,7 @@ describe('Flow: Chat Conversation', () => {
     const ChatPreview = (await import('@/components/landing/ChatPreview')).default
     render(<ChatPreview />, { wrapper: TestWrapper })
 
-    const input = screen.getByPlaceholderText(/Describe tu proyecto/)
+    const input = screen.getByPlaceholderText(/restaurante.*pitch|pitch.*restaurante|sistema para mi/i)
 
     // Send first message
     fireEvent.change(input, { target: { value: 'Msg 1' } })

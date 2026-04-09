@@ -93,7 +93,7 @@ describe('HeroSection — Smoke Tests', () => {
   it('renders hero description', async () => {
     const HeroSection = (await import('@/components/landing/HeroSection')).default
     render(<HeroSection />, { wrapper: TestWrapper })
-    expect(screen.getByText(/Describe tu proyecto/)).toBeInTheDocument()
+    expect(screen.getByText(/presentaciones premium/i)).toBeInTheDocument()
   })
 
   it('renders both CTA buttons', async () => {
@@ -160,22 +160,26 @@ describe('CasesSection — Smoke Tests', () => {
     expect(screen.getByText(/cobran vida/)).toBeInTheDocument()
   })
 
-  it('renders all 4 case studies', async () => {
+  it('renders case studies including presentations', async () => {
     const CasesSection = (await import('@/components/landing/CasesSection')).default
     render(<CasesSection />, { wrapper: TestWrapper })
     expect(screen.getByText('RestoPro')).toBeInTheDocument()
     expect(screen.getByText('FitTrack')).toBeInTheDocument()
     expect(screen.getByText('LegalBot')).toBeInTheDocument()
-    expect(screen.getByText('PropertyHub')).toBeInTheDocument()
+    expect(screen.getByText('EcoCharge Pitch')).toBeInTheDocument()
+    expect(screen.getByText('Propuesta TechCo')).toBeInTheDocument()
+    expect(screen.getByText('Tesis Energías')).toBeInTheDocument()
   })
 
-  it('renders project types', async () => {
+  it('renders project types including presentations', async () => {
     const CasesSection = (await import('@/components/landing/CasesSection')).default
     render(<CasesSection />, { wrapper: TestWrapper })
     expect(screen.getByText('SaaS')).toBeInTheDocument()
     expect(screen.getByText('App')).toBeInTheDocument()
     expect(screen.getByText('MVP')).toBeInTheDocument()
-    expect(screen.getByText('Sistema')).toBeInTheDocument()
+    expect(screen.getAllByText('Pitch Deck').length).toBeGreaterThanOrEqual(1)
+    expect(screen.getAllByText('Propuesta Comercial').length).toBeGreaterThanOrEqual(1)
+    expect(screen.getAllByText(/Trabajo/).length).toBeGreaterThanOrEqual(1)
   })
 
   it('renders tech tags', async () => {
@@ -184,7 +188,6 @@ describe('CasesSection — Smoke Tests', () => {
     expect(screen.getByText('Next.js')).toBeInTheDocument()
     expect(screen.getByText('Supabase')).toBeInTheDocument()
     expect(screen.getByText('Claude AI')).toBeInTheDocument()
-    expect(screen.getByText('Three.js')).toBeInTheDocument()
   })
 
   it('has correct section id', async () => {
@@ -278,7 +281,7 @@ describe('ChatPreview — Smoke Tests', () => {
   it('renders input and send button', async () => {
     const ChatPreview = (await import('@/components/landing/ChatPreview')).default
     render(<ChatPreview />, { wrapper: TestWrapper })
-    expect(screen.getByPlaceholderText(/Describe tu proyecto/)).toBeInTheDocument()
+    expect(screen.getByPlaceholderText(/sistema para mi/i)).toBeInTheDocument()
     expect(screen.getByText('Enviar')).toBeInTheDocument()
   })
 
@@ -292,7 +295,7 @@ describe('ChatPreview — Smoke Tests', () => {
   it('allows typing a message', async () => {
     const ChatPreview = (await import('@/components/landing/ChatPreview')).default
     render(<ChatPreview />, { wrapper: TestWrapper })
-    const input = screen.getByPlaceholderText(/Describe tu proyecto/)
+    const input = screen.getByPlaceholderText(/sistema para mi/i)
     fireEvent.change(input, { target: { value: 'Quiero una app de reservas' } })
     expect(input).toHaveValue('Quiero una app de reservas')
     expect(screen.getByText('Enviar')).not.toBeDisabled()
@@ -301,7 +304,7 @@ describe('ChatPreview — Smoke Tests', () => {
   it('sends message and shows user bubble', async () => {
     const ChatPreview = (await import('@/components/landing/ChatPreview')).default
     render(<ChatPreview />, { wrapper: TestWrapper })
-    const input = screen.getByPlaceholderText(/Describe tu proyecto/)
+    const input = screen.getByPlaceholderText(/sistema para mi/i)
     fireEvent.change(input, { target: { value: 'Quiero un CRM' } })
     fireEvent.submit(input.closest('form')!)
     expect(screen.getByText('Quiero un CRM')).toBeInTheDocument()
@@ -312,7 +315,7 @@ describe('ChatPreview — Smoke Tests', () => {
   it('shows loading dots after sending', async () => {
     const ChatPreview = (await import('@/components/landing/ChatPreview')).default
     const { container } = render(<ChatPreview />, { wrapper: TestWrapper })
-    const input = screen.getByPlaceholderText(/Describe tu proyecto/)
+    const input = screen.getByPlaceholderText(/sistema para mi/i)
     fireEvent.change(input, { target: { value: 'Test' } })
     fireEvent.submit(input.closest('form')!)
     // Loading dots should appear
@@ -323,7 +326,7 @@ describe('ChatPreview — Smoke Tests', () => {
   it('shows assistant response after delay', async () => {
     const ChatPreview = (await import('@/components/landing/ChatPreview')).default
     render(<ChatPreview />, { wrapper: TestWrapper })
-    const input = screen.getByPlaceholderText(/Describe tu proyecto/)
+    const input = screen.getByPlaceholderText(/sistema para mi/i)
     fireEvent.change(input, { target: { value: 'Test' } })
     fireEvent.submit(input.closest('form')!)
     await waitFor(

@@ -12,11 +12,11 @@ const cases = [
     gradient: 'from-neon-cyan to-blue-500',
   },
   {
-    name: 'FitTrack',
-    type: 'App',
-    description: 'Plataforma de seguimiento fitness con planes personalizados por IA.',
-    tags: ['React Native', 'OpenAI', 'Stripe'],
-    gradient: 'from-neon-green to-emerald-500',
+    name: 'EcoCharge Pitch',
+    type: 'Pitch Deck',
+    description: 'Presentación interactiva para inversores con métricas de tracción, financials y TAM/SAM/SOM.',
+    tags: ['Pitch Deck', 'Inversores', 'IA'],
+    gradient: 'from-green-500 to-emerald-500',
   },
   {
     name: 'LegalBot',
@@ -26,11 +26,25 @@ const cases = [
     gradient: 'from-neon-purple to-pink-500',
   },
   {
-    name: 'PropertyHub',
-    type: 'Sistema',
-    description: 'Portal inmobiliario con valoración automática y tour virtual 3D.',
-    tags: ['Three.js', 'Maps API', 'CRM'],
-    gradient: 'from-orange-500 to-red-500',
+    name: 'Propuesta TechCo',
+    type: 'Propuesta Comercial',
+    description: 'Propuesta de proyecto premium con timeline, entregables, inversión y equipo.',
+    tags: ['Propuesta', 'Interactiva', 'IA'],
+    gradient: 'from-orange-500 to-amber-500',
+  },
+  {
+    name: 'FitTrack',
+    type: 'App',
+    description: 'Plataforma de seguimiento fitness con planes personalizados por IA.',
+    tags: ['React Native', 'OpenAI', 'Stripe'],
+    gradient: 'from-neon-green to-emerald-500',
+  },
+  {
+    name: 'Tesis Energías',
+    type: 'Trabajo Académico',
+    description: 'Presentación de tesis sobre energías renovables con datos, gráficos y bibliografía.',
+    tags: ['Académico', 'Investigación', 'IA'],
+    gradient: 'from-blue-500 to-indigo-500',
   },
 ]
 

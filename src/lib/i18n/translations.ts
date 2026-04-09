@@ -199,8 +199,8 @@ export const T: Record<Lang, Translations> = {
     chat_subtitle: 'Escribe lo que quieres construir. Nuestra IA hará el resto.',
     chat_header: 'Kerno Studio AI',
     chat_empty_greeting: 'Hola, soy el asistente de Kerno Studio.',
-    chat_empty_instruction: 'Describe tu proyecto y generaremos un prototipo gratis.',
-    chat_placeholder: 'Describe tu proyecto... (ej: una app para gestionar reservas)',
+    chat_empty_instruction: 'Describe tu proyecto o presentación y la generamos al instante con IA.',
+    chat_placeholder: 'Un sistema para mi restaurante... / Un pitch deck para inversores...',
     chat_send: 'Enviar',
 
     building_title: 'Construyendo tu prototipo',
@@ -327,8 +327,8 @@ export const T: Record<Lang, Translations> = {
     chat_subtitle: 'Write what you want to build. Our AI will do the rest.',
     chat_header: 'Kerno Studio AI',
     chat_empty_greeting: "Hi, I'm Kerno Studio's assistant.",
-    chat_empty_instruction: 'Describe your project and we\'ll generate a free prototype.',
-    chat_placeholder: 'Describe your project... (e.g.: an app to manage bookings)',
+    chat_empty_instruction: 'Describe your project or presentation and we\'ll generate it instantly with AI.',
+    chat_placeholder: 'A system for my restaurant... / A pitch deck for investors...',
     chat_send: 'Send',
 
     building_title: 'Building your prototype',
