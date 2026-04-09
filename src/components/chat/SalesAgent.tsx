@@ -68,6 +68,19 @@ function SalesAgentInner({ agentId }: SalesAgentProps) {
     onError: (error) => {
       console.error('ElevenLabs error:', error)
     },
+    onUnhandledClientToolCall: (toolCall) => {
+      console.log('Unhandled tool call:', toolCall)
+      // Fallback: if the tool name matches, handle it
+      if (toolCall.tool_name === 'send_to_chat' && toolCall.parameters?.project_summary) {
+        const summary = toolCall.parameters.project_summary as string
+        window.dispatchEvent(
+          new CustomEvent('kerno:agent-summary', { detail: { message: summary } })
+        )
+        setTimeout(() => {
+          document.getElementById('chat')?.scrollIntoView({ behavior: 'smooth' })
+        }, 500)
+      }
+    },
   })
 
   // Auto-scroll messages
