@@ -62,11 +62,23 @@ export async function POST(req: Request) {
       if (jsonMatch) {
         customization = JSON.parse(jsonMatch[1])
       } else {
-        const arrayMatch = responseText.match(/\{[\s\S]*\}/)
-        if (arrayMatch) {
-          customization = JSON.parse(arrayMatch[0])
+        const objMatch = responseText.match(/\{[\s\S]*\}/)
+        if (objMatch) {
+          customization = JSON.parse(objMatch[0])
         } else {
-          throw new Error('Failed to parse template customization')
+          // Fallback: build customization directly from summary
+          console.error('Claude response not parseable, using fallback')
+          customization = {
+            templateId: 'generic',
+            businessName: summary.name,
+            businessType: summary.type,
+            primaryColor: branding?.primaryColor || '#00f0ff',
+            accentColor: '#f0a000',
+            modules: summary.estimated_modules.map(m => ({ name: m.name, description: m.description, icon: '⚙️', status: 'active' as const })),
+            features: summary.features,
+            mockData: {},
+            locale: 'es',
+          }
         }
       }
     }
@@ -74,7 +86,6 @@ export async function POST(req: Request) {
     // Render the premium template (instant, no AI)
     const html = renderPrototype(customization)
 
-    // Return as SSE stream (maintains ChatWidget compatibility)
     const pages = JSON.stringify([{
       name: customization.businessName || summary.name,
       slug: 'demo',
@@ -82,27 +93,27 @@ export async function POST(req: Request) {
       order: 0,
     }])
 
-    const encoder = new TextEncoder()
-    const readable = new ReadableStream({
-      start(controller) {
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: pages })}\n\n`))
-        controller.enqueue(encoder.encode('data: [DONE]\n\n'))
-        controller.close()
-      },
-    })
-
-    return new Response(readable, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        Connection: 'keep-alive',
-      },
-    })
+    return sseResponse(pages)
   } catch (error) {
-    console.error('Template prototype error, falling back to legacy generation:', error)
-    // ── Fallback: legacy Claude HTML generation ──
-    if (!summary) return Response.json({ error: 'Failed to generate' }, { status: 500 })
-    return legacyGeneration(summary, branding, model)
+    console.error('Template prototype error, using direct fallback:', error)
+    // Fallback: render generic template with summary data directly
+    try {
+      const html = renderPrototype({
+        templateId: 'generic',
+        businessName: summary.name,
+        businessType: summary.type,
+        primaryColor: branding?.primaryColor || '#00f0ff',
+        accentColor: '#f0a000',
+        modules: summary.estimated_modules.map(m => ({ name: m.name, description: m.description, icon: '⚙️', status: 'active' as const })),
+        features: summary.features,
+        mockData: {},
+        locale: 'es',
+      })
+      const pages = JSON.stringify([{ name: summary.name, slug: 'demo', html, order: 0 }])
+      return sseResponse(pages)
+    } catch {
+      return legacyGeneration(summary, branding, model)
+    }
   }
 }
 
@@ -148,8 +159,54 @@ async function legacyGeneration(
   }
 }
 
+function buildFallbackCustomization(brief: PresentationBrief): PresentationCustomization {
+  // Build customization directly from the brief without Claude
+  const typeMap: Record<string, string[]> = {
+    'pitch-deck': ['hero', 'problem', 'solution', 'market', 'business-model', 'traction', 'team', 'financials', 'ask'],
+    'school-project': ['cover', 'introduction', 'context', 'research', 'data', 'analysis', 'conclusions', 'references'],
+    'business-proposal': ['cover', 'executive-summary', 'scope', 'deliverables', 'timeline', 'investment', 'team', 'next-steps'],
+  }
+  const slideIds = typeMap[brief.type] || typeMap['pitch-deck']
+
+  return {
+    templateId: brief.type,
+    title: brief.title,
+    subtitle: brief.description,
+    author: brief.audience,
+    primaryColor: brief.primaryColor || '#22c55e',
+    accentColor: brief.accentColor || '#d4a843',
+    slides: slideIds.map((id, i) => ({
+      id,
+      title: brief.sections[i] || id,
+      content: {},
+      order: i,
+    })),
+    locale: brief.locale || 'es',
+  }
+}
+
+function sseResponse(pages: string): Response {
+  const encoder = new TextEncoder()
+  const readable = new ReadableStream({
+    start(controller) {
+      controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: pages })}\n\n`))
+      controller.enqueue(encoder.encode('data: [DONE]\n\n'))
+      controller.close()
+    },
+  })
+  return new Response(readable, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+    },
+  })
+}
+
 async function generatePresentation(brief: PresentationBrief) {
   const model = 'claude-sonnet-4-20250514'
+
+  let customization: PresentationCustomization
 
   try {
     const selectorPrompt = buildPresentationSelectorPrompt(brief, listPresentationTemplateMetas())
@@ -166,7 +223,6 @@ async function generatePresentation(brief: PresentationBrief) {
 
     trackClaudeCost('presentation-generate', selectorResponse.usage.input_tokens, selectorResponse.usage.output_tokens, model)
 
-    let customization: PresentationCustomization
     try {
       customization = JSON.parse(responseText)
     } catch {
@@ -178,11 +234,17 @@ async function generatePresentation(brief: PresentationBrief) {
         if (objMatch) {
           customization = JSON.parse(objMatch[0])
         } else {
-          throw new Error('Failed to parse presentation customization')
+          console.error('Claude response not parseable, using fallback. Response:', responseText.substring(0, 500))
+          customization = buildFallbackCustomization(brief)
         }
       }
     }
+  } catch (error) {
+    console.error('Presentation Claude call failed, using fallback:', error)
+    customization = buildFallbackCustomization(brief)
+  }
 
+  try {
     const html = renderPresentation(customization)
 
     const pages = JSON.stringify([{
@@ -192,24 +254,9 @@ async function generatePresentation(brief: PresentationBrief) {
       order: 0,
     }])
 
-    const encoder = new TextEncoder()
-    const readable = new ReadableStream({
-      start(controller) {
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: pages })}\n\n`))
-        controller.enqueue(encoder.encode('data: [DONE]\n\n'))
-        controller.close()
-      },
-    })
-
-    return new Response(readable, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        Connection: 'keep-alive',
-      },
-    })
+    return sseResponse(pages)
   } catch (error) {
-    console.error('Presentation generation error:', error)
-    return Response.json({ error: 'Failed to generate presentation' }, { status: 500 })
+    console.error('Presentation render failed:', error)
+    return Response.json({ error: 'Failed to render presentation' }, { status: 500 })
   }
 }
