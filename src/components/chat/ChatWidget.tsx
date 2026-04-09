@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useI18n } from '@/lib/i18n/context'
 import type { ProjectSummary, PrototypePage } from '@/types/database'
+import type { PresentationBrief } from '@/types/presentations'
 import VoiceButton from './VoiceButton'
 import SummaryCard from './SummaryCard'
 import BuildingPreview, { ADDON_POOL } from './BuildingPreview'
@@ -14,6 +15,7 @@ interface Message {
 }
 
 type Phase = 'chat' | 'building' | 'preview'
+type ServiceMode = 'prototype' | 'presentation'
 
 export default function ChatWidget() {
   const { t } = useI18n()
@@ -22,6 +24,8 @@ export default function ChatWidget() {
   const [loading, setLoading] = useState(false)
   const [streamingText, setStreamingText] = useState('')
   const [summary, setSummary] = useState<ProjectSummary | null>(null)
+  const [brief, setBrief] = useState<PresentationBrief | null>(null)
+  const [serviceMode, setServiceMode] = useState<ServiceMode>('prototype')
   const [phase, setPhase] = useState<Phase>('chat')
   const [buildProgress, setBuildProgress] = useState(0)
   const [prototypePages, setPrototypePages] = useState<PrototypePage[]>([])
@@ -125,8 +129,41 @@ export default function ChatWidget() {
     return null
   }
 
+  const extractBrief = (text: string): PresentationBrief | null => {
+    const match = text.match(/```json:brief\n([\s\S]*?)```/)
+    if (match) {
+      try { return JSON.parse(match[1]) as PresentationBrief } catch { /* try repair */ }
+      try {
+        let json = match[1].trim().replace(/,\s*$/, '')
+        const opens = (json.match(/\[/g) || []).length - (json.match(/\]/g) || []).length
+        const braces = (json.match(/\{/g) || []).length - (json.match(/\}/g) || []).length
+        const quotes = (json.match(/"/g) || []).length
+        if (quotes % 2 !== 0) json += '"'
+        for (let i = 0; i < opens; i++) json += ']'
+        for (let i = 0; i < braces; i++) json += '}'
+        const parsed = JSON.parse(json) as PresentationBrief
+        if (parsed.title && parsed.type) return parsed
+      } catch { /* give up */ }
+    }
+    const unclosed = text.match(/```json:brief\n([\s\S]*)$/)
+    if (unclosed) {
+      try {
+        let json = unclosed[1].trim().replace(/,\s*$/, '')
+        const quotes = (json.match(/"/g) || []).length
+        if (quotes % 2 !== 0) json += '"'
+        const opens = (json.match(/\[/g) || []).length - (json.match(/\]/g) || []).length
+        const braces = (json.match(/\{/g) || []).length - (json.match(/\}/g) || []).length
+        for (let i = 0; i < opens; i++) json += ']'
+        for (let i = 0; i < braces; i++) json += '}'
+        const parsed = JSON.parse(json) as PresentationBrief
+        if (parsed.title && parsed.type) return parsed
+      } catch { /* give up */ }
+    }
+    return null
+  }
+
   const cleanContent = (text: string): string => {
-    return text.replace(/```json:summary\n[\s\S]*?```/, '').trim()
+    return text.replace(/```json:summary\n[\s\S]*?```/, '').replace(/```json:brief\n[\s\S]*?```/, '').trim()
   }
 
   const sendMessage = async (content: string) => {
@@ -176,8 +213,15 @@ export default function ChatWidget() {
         }
       }
 
-      const extracted = extractSummary(fullText)
-      if (extracted) setSummary(extracted)
+      const extractedSummary = extractSummary(fullText)
+      const extractedBrief = extractBrief(fullText)
+      if (extractedSummary) {
+        setSummary(extractedSummary)
+        setServiceMode('prototype')
+      } else if (extractedBrief) {
+        setBrief(extractedBrief)
+        setServiceMode('presentation')
+      }
 
       setMessages((prev) => [
         ...prev,
@@ -198,7 +242,7 @@ export default function ChatWidget() {
   sendMessageRef.current = sendMessage
 
   const handleGeneratePrototype = async () => {
-    if (!summary) return
+    if (!summary && !brief) return
     setPhase('building')
     setBuildProgress(0)
     setPrototypeError(null)
@@ -212,13 +256,16 @@ export default function ChatWidget() {
     }, 800)
 
     try {
-      const response = await fetch('/api/prototype', {
+      // Route to appropriate API based on service mode
+      const endpoint = serviceMode === 'presentation' ? '/api/prototype' : '/api/prototype'
+      const body = serviceMode === 'presentation' && brief
+        ? { brief, mode: 'presentation' }
+        : { summary, branding: { companyName: summary?.name, primaryColor: '#00f0ff' } }
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          summary,
-          branding: { companyName: summary.name, primaryColor: '#00f0ff' },
-        }),
+        body: JSON.stringify(body),
       })
 
       if (!response.ok) throw new Error('Prototype generation failed')
@@ -303,6 +350,7 @@ export default function ChatWidget() {
 
   const handleRequestChanges = () => {
     setSummary(null)
+    setBrief(null)
     setPrototypePages([])
     setPrototypeError(null)
     setPhase('chat')
@@ -497,8 +545,39 @@ export default function ChatWidget() {
             )}
           </div>
 
+          {/* Brief card for presentations */}
+          {brief && serviceMode === 'presentation' && (
+            <div className="mx-6 mb-4 p-5 rounded-2xl bg-surface-3 border border-border">
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <h3 className="text-lg font-bold">{brief.title}</h3>
+                  <div className="flex gap-2 mt-1">
+                    <span className="px-2.5 py-0.5 rounded-full text-xs bg-neon-cyan/10 text-neon-cyan border border-neon-cyan/20">
+                      {brief.type === 'pitch-deck' ? 'Pitch Deck' : brief.type === 'school-project' ? 'Trabajo Académico' : brief.type === 'business-proposal' ? 'Propuesta Comercial' : 'Reporte'}
+                    </span>
+                    <span className="px-2.5 py-0.5 rounded-full text-xs bg-surface-2 text-muted border border-border">{brief.style}</span>
+                  </div>
+                </div>
+              </div>
+              <p className="text-sm text-muted mb-3">{brief.description}</p>
+              {brief.keyPoints.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mb-3">
+                  {brief.keyPoints.map((p, i) => <span key={i} className="px-2 py-1 rounded-lg text-xs bg-surface-2 text-muted border border-border">{p}</span>)}
+                </div>
+              )}
+              <div className="flex gap-3">
+                <button onClick={handleGeneratePrototype} className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-neon-cyan to-neon-green text-black font-semibold text-sm hover:opacity-90 transition-opacity">
+                  Generar Presentación
+                </button>
+                <button onClick={handleRequestChanges} className="px-6 py-3 rounded-xl border border-border hover:border-neon-cyan/50 text-foreground text-sm transition-all">
+                  Cambiar cosas
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Summary card with addon chips */}
-          {summary && (
+          {summary && serviceMode === 'prototype' && (
             <>
               <SummaryCard
                 summary={summary}
