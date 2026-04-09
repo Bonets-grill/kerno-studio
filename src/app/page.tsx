@@ -20,8 +20,7 @@ const SalesAgentDynamic = dynamic(
 )
 
 function SalesAgentWrapper() {
-  const agentId = process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID
-  if (!agentId) return null
+  const agentId = process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID || 'agent_5301knsafpjyfmhs1y82h7cncqbz'
   return (
     <ErrorBoundary>
       <SalesAgentDynamic agentId={agentId} />
