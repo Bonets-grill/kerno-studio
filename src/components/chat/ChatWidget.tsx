@@ -41,6 +41,18 @@ export default function ChatWidget() {
     scrollToBottom()
   }, [messages, streamingText, scrollToBottom])
 
+  // Listen for ElevenLabs agent sending project summary
+  useEffect(() => {
+    const handleAgentSummary = (e: Event) => {
+      const detail = (e as CustomEvent).detail
+      if (detail?.message) {
+        sendMessage(detail.message)
+      }
+    }
+    window.addEventListener('kerno:agent-summary', handleAgentSummary)
+    return () => window.removeEventListener('kerno:agent-summary', handleAgentSummary)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   const extractSummary = (text: string): ProjectSummary | null => {
     const match = text.match(/```json:summary\n([\s\S]*?)```/)
     if (!match) return null
