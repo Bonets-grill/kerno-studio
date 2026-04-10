@@ -372,29 +372,34 @@ export default function ChatWidget() {
   const addonsTotal = ADDON_POOL.filter(a => selectedAddons.includes(a.id)).reduce((sum, a) => sum + a.price, 0)
 
   // PHASE: PREVIEW — full-width prototype viewer
-  if (phase === 'preview' && prototypePages.length > 0 && summary) {
+  if (phase === 'preview' && prototypePages.length > 0 && (summary || brief)) {
     return (
       <section id="chat" className="py-20 px-6 bg-surface">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-10">
             <h2 className="text-3xl md:text-4xl font-bold mb-3">
-              Tu <span className="gradient-text">prototipo</span> está listo
+              Tu <span className="gradient-text">{brief ? 'presentación' : 'prototipo'}</span> está listo
             </h2>
             <p className="text-muted">
-              {summary.name} — {prototypePages.length} pantallas generadas con IA
+              {(summary?.name || brief?.title || '')} — generado con IA
             </p>
           </div>
 
           <PrototypeViewer
             pages={prototypePages}
-            projectName={summary.name}
+            projectName={summary?.name || brief?.title || 'Preview'}
             onApprove={() => {
               setPhase('chat')
+              const projectName = summary?.name || brief?.title || ''
               setMessages((prev) => [
                 ...prev,
-                { role: 'assistant', content: `¡Prototipo aprobado! 🎉\n\nTu proyecto "${summary.name}" está listo para comenzar.\n\nTotal: ${(summary.total_price + addonsTotal).toLocaleString()}€${addonsTotal > 0 ? ` (incluye extras por ${addonsTotal.toLocaleString()}€)` : ''}\n\nTe contactaremos pronto con los próximos pasos y el enlace de pago del depósito (50%).` },
+                { role: 'assistant', content: summary
+                  ? `¡Prototipo aprobado! 🎉\n\nTu proyecto "${projectName}" está listo para comenzar.\n\nTotal: ${(summary.total_price + addonsTotal).toLocaleString()}€${addonsTotal > 0 ? ` (incluye extras por ${addonsTotal.toLocaleString()}€)` : ''}\n\nTe contactaremos pronto con los próximos pasos y el enlace de pago del depósito (50%).`
+                  : `¡Presentación lista! 🎉\n\n"${projectName}" ha sido generada. ¿Quieres descargarla o hacer cambios?`
+                },
               ])
               setSummary(null)
+              setBrief(null)
               setPrototypePages([])
             }}
             onRequestChanges={handleRequestChanges}
@@ -416,7 +421,7 @@ export default function ChatWidget() {
               </div>
               <div className="mt-3 pt-3 border-t border-border flex justify-between">
                 <span className="text-muted text-sm">Nuevo total del proyecto</span>
-                <span className="text-xl font-bold gradient-text">{(summary.total_price + addonsTotal).toLocaleString()}€</span>
+                <span className="text-xl font-bold gradient-text">{((summary?.total_price || 0) + addonsTotal).toLocaleString()}€</span>
               </div>
             </div>
           )}
@@ -426,7 +431,12 @@ export default function ChatWidget() {
   }
 
   // PHASE: BUILDING — split screen chat + building preview
-  if (phase === 'building' && summary) {
+  if (phase === 'building' && (summary || brief)) {
+    const buildName = summary?.name || brief?.title || ''
+    const buildModules = summary?.estimated_modules.length || brief?.sections.length || 0
+    const buildDays = summary?.timeline_days || 0
+    const buildPrice = summary?.total_price || 0
+
     return (
       <section id="chat" className="py-20 px-6 bg-surface">
         <div className="max-w-6xl mx-auto">
@@ -455,13 +465,13 @@ export default function ChatWidget() {
               <div className="p-4 border-t border-border bg-surface-3/50">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-sm font-semibold">{summary.name}</div>
-                    <div className="text-xs text-muted">{summary.estimated_modules.length} módulos · {summary.timeline_days} días</div>
+                    <div className="text-sm font-semibold">{buildName}</div>
+                    <div className="text-xs text-muted">{buildModules} {brief ? 'secciones' : 'módulos'}{buildDays > 0 ? ` · ${buildDays} días` : ''}</div>
                   </div>
                   <div className="text-right">
-                    <div className="text-lg font-bold gradient-text">
-                      {(summary.total_price + addonsTotal).toLocaleString()}€
-                    </div>
+                    {buildPrice > 0 && <div className="text-lg font-bold gradient-text">
+                      {(buildPrice + addonsTotal).toLocaleString()}€
+                    </div>}
                     {addonsTotal > 0 && (
                       <div className="text-xs text-neon-green">+{addonsTotal.toLocaleString()}€ extras</div>
                     )}
@@ -472,12 +482,22 @@ export default function ChatWidget() {
 
             {/* Right: Building preview with upsells */}
             <div className="rounded-2xl bg-surface-2 border border-border overflow-hidden">
-              <BuildingPreview
+              {summary && <BuildingPreview
                 summary={summary}
                 selectedAddons={selectedAddons}
                 onToggleAddon={handleToggleAddon}
                 progress={buildProgress}
-              />
+              />}
+              {brief && !summary && (
+                <div className="p-8 flex flex-col items-center justify-center min-h-[400px] text-center">
+                  <div className="text-4xl mb-4 animate-pulse">📊</div>
+                  <h3 className="text-lg font-bold mb-2">Generando presentación...</h3>
+                  <p className="text-sm text-muted mb-4">{brief.title}</p>
+                  <div className="w-full max-w-xs bg-surface-3 rounded-full h-2 overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-neon-cyan to-neon-green rounded-full transition-all duration-500" style={{ width: `${buildProgress}%` }} />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
