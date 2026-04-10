@@ -19,6 +19,7 @@ import { socialTemplate } from './industries/social'
 import { analyticsTemplate } from './industries/analytics'
 import { servicesTemplate } from './industries/services'
 import { fleetTemplate } from './industries/fleet'
+import { legalTemplate } from './industries/legal'
 import type { TemplateDefinition, TemplateCustomization, TemplateMeta } from './types'
 
 const TEMPLATES: Record<string, TemplateDefinition> = {
@@ -43,6 +44,7 @@ const TEMPLATES: Record<string, TemplateDefinition> = {
   analytics: analyticsTemplate,
   services: servicesTemplate,
   fleet: fleetTemplate,
+  legal: legalTemplate,
 }
 
 export function getTemplate(id: string): TemplateDefinition | undefined {

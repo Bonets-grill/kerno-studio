@@ -29,6 +29,8 @@ const INDUSTRY_KEYWORDS: [string, string[]][] = [
   ['social', ['social', 'community', 'comunidad', 'red social', 'foro', 'forum', 'chat', 'messaging']],
   ['analytics', ['analytics', 'analítica', 'business intelligence', 'métricas', 'metrics', 'reporting', 'reportes', 'datos']],
   ['fleet', ['fleet', 'flota', 'vehículos', 'vehicles', 'rental', 'alquiler', 'taller', 'garage']],
+  ['legal', ['legal', 'abogado', 'lawyer', 'law firm', 'bufete', 'jurídico', 'expedientes', 'notaría', 'notary']],
+  ['services', ['peluquería', 'barbería', 'beauty', 'belleza', 'spa', 'salon', 'nail', 'uñas', 'masaje']],
   ['saas', ['saas', 'plataforma', 'software', 'api', 'startup', 'fintech', 'subscription', 'suscripción']],
 ]
 
