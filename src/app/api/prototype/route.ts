@@ -9,34 +9,58 @@ export const maxDuration = 60
 
 // ── Deterministic template selection — NO Claude dependency ──
 
-const RESTAURANT_KEYWORDS = ['restaurant', 'restaurante', 'bar ', 'café', 'cafe', 'pizz', 'hostelería', 'hotel', 'comida', 'food', 'cocina', 'kitchen', 'carta digital', 'menú digital', 'catering', 'gastronom']
-const SAAS_KEYWORDS = ['saas', 'platform', 'plataforma', 'software', 'app', 'dashboard', 'api', 'crm', 'erp', 'startup', 'fintech', 'marketplace', 'subscription', 'suscripción']
+// Industry keyword maps — order matters (first match wins)
+const INDUSTRY_KEYWORDS: [string, string[]][] = [
+  ['restaurant', ['restaurant', 'restaurante', 'café', 'cafe', 'pizz', 'hostelería', 'comida', 'food', 'cocina', 'carta digital', 'menú digital', 'catering', 'gastronom']],
+  ['clinic', ['clínica', 'clinic', 'dental', 'médico', 'doctor', 'hospital', 'salud', 'health', 'paciente', 'patient', 'veterinari', 'farmacia', 'telemedicina']],
+  ['ecommerce', ['ecommerce', 'tienda online', 'shop', 'store', 'catálogo', 'catalog', 'carrito', 'cart', 'producto', 'venta online']],
+  ['crm', ['crm', 'leads', 'pipeline', 'ventas', 'sales', 'clientes', 'customers', 'contactos']],
+  ['gym', ['gym', 'gimnasio', 'fitness', 'crossfit', 'yoga', 'pilates', 'deporte', 'sport', 'entrenamiento', 'training']],
+  ['realestate', ['inmobiliaria', 'real estate', 'propiedades', 'properties', 'vivienda', 'pisos', 'apartments', 'agencia inmobiliaria']],
+  ['erp', ['erp', 'enterprise', 'gestión empresarial', 'nóminas', 'payroll', 'inventario general']],
+  ['lms', ['lms', 'educación', 'education', 'cursos', 'courses', 'academia', 'academy', 'escuela', 'school', 'formación', 'e-learning']],
+  ['booking', ['booking', 'hotel', 'hostal', 'alojamiento', 'accommodation', 'turismo', 'tourism', 'tours', 'vacation']],
+  ['delivery', ['delivery', 'envío', 'shipping', 'logística', 'logistics', 'transporte', 'courier', 'paquetería', 'reparto']],
+  ['hr', ['rrhh', 'recursos humanos', 'human resources', 'talento', 'talent', 'empleados', 'employees']],
+  ['accounting', ['contabilidad', 'accounting', 'facturación', 'invoicing', 'impuestos', 'taxes', 'fiscal', 'finanzas', 'finance']],
+  ['projectmgmt', ['project management', 'gestión de proyectos', 'tareas', 'tasks', 'agile', 'scrum', 'kanban']],
+  ['marketplace', ['marketplace', 'mercado', 'compra-venta', 'classified', 'anuncios', 'listings', 'segunda mano', 'subasta']],
+  ['helpdesk', ['helpdesk', 'soporte', 'support', 'tickets', 'customer service', 'atención al cliente', 'incidencias']],
+  ['social', ['social', 'community', 'comunidad', 'red social', 'foro', 'forum', 'chat', 'messaging']],
+  ['analytics', ['analytics', 'analítica', 'business intelligence', 'métricas', 'metrics', 'reporting', 'reportes', 'datos']],
+  ['fleet', ['fleet', 'flota', 'vehículos', 'vehicles', 'rental', 'alquiler', 'taller', 'garage']],
+  ['saas', ['saas', 'plataforma', 'software', 'api', 'startup', 'fintech', 'subscription', 'suscripción']],
+]
 
-// Color palettes per industry for variety
+// Color palettes per industry
 const COLOR_PALETTES: Record<string, { primary: string; accent: string }[]> = {
-  restaurant: [
-    { primary: '#1a5c38', accent: '#d4a843' },
-    { primary: '#8b2500', accent: '#f0c040' },
-    { primary: '#2d3e50', accent: '#e67e22' },
-  ],
-  saas: [
-    { primary: '#6366f1', accent: '#f59e0b' },
-    { primary: '#0ea5e9', accent: '#22c55e' },
-    { primary: '#8b5cf6', accent: '#ec4899' },
-  ],
-  generic: [
-    { primary: '#3b82f6', accent: '#f59e0b' },
-    { primary: '#059669', accent: '#d97706' },
-    { primary: '#7c3aed', accent: '#06b6d4' },
-    { primary: '#dc2626', accent: '#fbbf24' },
-    { primary: '#0891b2', accent: '#f97316' },
-  ],
+  restaurant: [{ primary: '#1a5c38', accent: '#d4a843' }, { primary: '#8b2500', accent: '#f0c040' }],
+  clinic: [{ primary: '#0d9488', accent: '#f59e0b' }, { primary: '#2563eb', accent: '#06b6d4' }],
+  ecommerce: [{ primary: '#7c3aed', accent: '#ec4899' }, { primary: '#6366f1', accent: '#f59e0b' }],
+  crm: [{ primary: '#1e40af', accent: '#f59e0b' }, { primary: '#0369a1', accent: '#22c55e' }],
+  gym: [{ primary: '#dc2626', accent: '#f59e0b' }, { primary: '#ea580c', accent: '#fbbf24' }],
+  realestate: [{ primary: '#1a1a2e', accent: '#d4a843' }, { primary: '#0f4c5c', accent: '#e9c46a' }],
+  erp: [{ primary: '#1e293b', accent: '#3b82f6' }, { primary: '#334155', accent: '#0ea5e9' }],
+  lms: [{ primary: '#4f46e5', accent: '#a855f7' }, { primary: '#6d28d9', accent: '#f472b6' }],
+  booking: [{ primary: '#0369a1', accent: '#f59e0b' }, { primary: '#155e75', accent: '#fbbf24' }],
+  delivery: [{ primary: '#15803d', accent: '#f59e0b' }, { primary: '#166534', accent: '#fbbf24' }],
+  hr: [{ primary: '#059669', accent: '#6366f1' }, { primary: '#047857', accent: '#8b5cf6' }],
+  accounting: [{ primary: '#1e3a5f', accent: '#22c55e' }, { primary: '#1e293b', accent: '#0ea5e9' }],
+  projectmgmt: [{ primary: '#4338ca', accent: '#06b6d4' }, { primary: '#6d28d9', accent: '#14b8a6' }],
+  marketplace: [{ primary: '#0891b2', accent: '#f97316' }, { primary: '#0e7490', accent: '#fbbf24' }],
+  helpdesk: [{ primary: '#0284c7', accent: '#22c55e' }, { primary: '#0369a1', accent: '#a3e635' }],
+  social: [{ primary: '#7c3aed', accent: '#f43f5e' }, { primary: '#8b5cf6', accent: '#ec4899' }],
+  analytics: [{ primary: '#1e40af', accent: '#06b6d4' }, { primary: '#1d4ed8', accent: '#14b8a6' }],
+  fleet: [{ primary: '#374151', accent: '#f59e0b' }, { primary: '#4b5563', accent: '#22c55e' }],
+  saas: [{ primary: '#6366f1', accent: '#f59e0b' }, { primary: '#0ea5e9', accent: '#22c55e' }],
+  generic: [{ primary: '#3b82f6', accent: '#f59e0b' }, { primary: '#059669', accent: '#d97706' }, { primary: '#7c3aed', accent: '#06b6d4' }, { primary: '#dc2626', accent: '#fbbf24' }],
 }
 
 function selectTemplateId(summary: ProjectSummary): string {
   const text = `${summary.name} ${summary.description} ${summary.features.join(' ')} ${summary.type}`.toLowerCase()
-  if (RESTAURANT_KEYWORDS.some(k => text.includes(k))) return 'restaurant'
-  if (summary.type === 'saas' || SAAS_KEYWORDS.some(k => text.includes(k))) return 'saas'
+  for (const [id, keywords] of INDUSTRY_KEYWORDS) {
+    if (keywords.some(k => text.includes(k))) return id
+  }
   return 'generic'
 }
 
