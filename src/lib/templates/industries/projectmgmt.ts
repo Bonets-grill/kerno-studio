@@ -1,12 +1,4 @@
 import type { TemplateDefinition, TemplateCustomization } from '../types'
-import { designSystemCSS } from '../shared/design-system'
-import { allScripts } from '../shared/scripts'
-import {
-  navBar, heroSection, notificationContainer, section,
-  kpiGrid, dataTable, progressBar, horizontalBarChart,
-  settingsForm, alertRow, bigResult,
-  type KpiData, type TableColumn, type BarChartItem, type SettingsField,
-} from '../shared/components'
 
 export const projectmgmtTemplate: TemplateDefinition = {
   meta: {
@@ -14,494 +6,858 @@ export const projectmgmtTemplate: TemplateDefinition = {
     name: 'Gestión de Proyectos',
     industries: ['project', 'proyecto', 'tasks', 'tareas', 'gestión de proyectos', 'project management', 'agile', 'scrum', 'kanban'],
     projectTypes: ['landing', 'mvp', 'system', 'saas'],
-    sections: ['hero', 'dashboard', 'projects', 'tasks', 'team', 'timeline', 'analytics', 'settings'],
-    description: 'Plantilla premium para gestión de proyectos. Dashboard con KPIs de proyectos y tareas, vista de proyectos con progreso, tablero kanban de tareas, equipo con asignaciones, timeline tipo Gantt, analytics de productividad y configuración.',
+    sections: ['dashboard', 'projects', 'tasks', 'team', 'timeline', 'analytics', 'settings'],
+    description: 'Plantilla premium para gestión de proyectos con sidebar. Dashboard con KPIs de proyectos y tareas, vista de proyectos con progreso, tablero kanban, equipo con asignaciones, timeline tipo Gantt, analytics de productividad y configuración.',
   },
 
   render(c: TemplateCustomization): string {
-    const md = c.mockData as ProjectMgmtMockData
+    const p = c.primaryColor || '#6366f1'
+    const a = c.accentColor || '#8b5cf6'
+    const biz = c.businessName || 'Project Hub'
 
-    // ── Nav
-    const nav = navBar(c.businessName, [
-      { id: 'hero', label: 'Inicio' },
-      { id: 'dashboard', label: 'Dashboard' },
-      { id: 'projects', label: 'Proyectos' },
-      { id: 'tasks', label: 'Tareas' },
-      { id: 'team', label: 'Equipo' },
-      { id: 'timeline', label: 'Timeline' },
-      { id: 'analytics', label: 'Analytics' },
-      { id: 'settings', label: 'Config' },
-    ])
-
-    // ── Hero
-    const hero = heroSection(
-      c.businessName,
-      md?.heroTagline || `${c.businessName} — Proyectos bajo Control`,
-      md?.heroSubtitle || 'Gestión ágil de proyectos, tareas, equipo y timeline. Todo sincronizado en tiempo real.',
-      [
-        { value: md?.activeProjects || 8, label: 'Proyectos Activos' },
-        { value: md?.totalTasks || 156, label: 'Tareas Totales' },
-        { value: md?.completedPct || 67, label: 'Completado', suffix: '%' },
-        { value: md?.teamSize || 14, label: 'Miembros' },
-      ],
-      `Demo Interactivo — ${c.businessType || 'Project Management'}`
-    )
-
-    // ── Dashboard
-    const dashKpis: KpiData[] = [
-      { icon: '📂', label: 'Proyectos Activos', value: md?.activeProjects || 8, trend: { value: '+2 este mes', direction: 'up' } },
-      { icon: '✅', label: 'Tareas Completadas', value: md?.tasksCompleted || 104, trend: { value: '+18 esta semana', direction: 'up' } },
-      { icon: '⏳', label: 'Tareas En Progreso', value: md?.tasksInProgress || 32, trend: { value: '8 bloqueadas', direction: 'neutral' } },
-      { icon: '🎯', label: 'Sprint Velocity', value: md?.velocity || 42, suffix: ' pts', trend: { value: '+5 vs anterior', direction: 'up' } },
-    ]
-
-    const projectProgress: BarChartItem[] = md?.projectProgress || [
-      { label: 'Rediseño Web Corporativa', value: 85, color: 'var(--success)' },
-      { label: 'App Móvil v2.0', value: 62, color: 'var(--primary-light)' },
-      { label: 'Migración Cloud AWS', value: 45, color: 'var(--accent)' },
-      { label: 'Portal de Clientes', value: 78, color: 'var(--success)' },
-      { label: 'Sistema de Facturación', value: 30, color: 'var(--warning)' },
-    ]
-
-    const dashAlerts = [
-      alertRow('🔴', md?.alert1 || 'App Móvil — 3 tareas bloqueadas por dependencias', 'Bloqueado', 'badge-red'),
-      alertRow('⚠️', md?.alert2 || 'Migración Cloud — deadline en 5 días, 45% completado', 'Riesgo', 'badge-yellow'),
-      alertRow('🎉', md?.alert3 || 'Portal de Clientes — sprint review mañana 10:00', 'Review', 'badge-blue'),
-      alertRow('📋', md?.alert4 || 'Planificación Q3 — crear épicas antes del viernes', 'Planning', 'badge-purple'),
-    ]
-
-    const dashContent = `
-      ${kpiGrid(dashKpis)}
-      <div class="grid-2" style="margin-top:1.5rem">
-        <div class="card">
-          <div class="card-header"><h3>Progreso de Proyectos</h3><span class="badge badge-accent">Activos</span></div>
-          ${horizontalBarChart(projectProgress, 100)}
-        </div>
-        <div class="card">
-          <div class="card-header"><h3>Alertas del Equipo</h3><span class="badge badge-primary">${md?.alertCount || 4} activas</span></div>
-          ${dashAlerts.join('')}
-        </div>
-      </div>`
-
-    const dashSection = section('dashboard', c.businessType?.toUpperCase() || 'PROYECTOS', 'Panel de Control',
-      'Vista general del estado de todos los proyectos, tareas y rendimiento del equipo.',
-      dashContent)
-
-    // ── Projects
-    const projects = md?.projects || [
-      { name: 'Rediseño Web Corporativa', status: 'active', progress: 85, tasks: '34/40', team: 4, deadline: '30/04/2026', priority: 'high', color: 'var(--success)' },
-      { name: 'App Móvil v2.0', status: 'active', progress: 62, tasks: '28/45', team: 5, deadline: '15/06/2026', priority: 'high', color: 'var(--primary-light)' },
-      { name: 'Migración Cloud AWS', status: 'at-risk', progress: 45, tasks: '18/40', team: 3, deadline: '14/04/2026', priority: 'critical', color: 'var(--warning)' },
-      { name: 'Portal de Clientes', status: 'active', progress: 78, tasks: '23/30', team: 3, deadline: '20/05/2026', priority: 'medium', color: 'var(--success)' },
-      { name: 'Sistema de Facturación', status: 'active', progress: 30, tasks: '9/30', team: 2, deadline: '31/07/2026', priority: 'medium', color: 'var(--accent)' },
-      { name: 'Integración CRM', status: 'planning', progress: 10, tasks: '2/20', team: 2, deadline: '30/08/2026', priority: 'low', color: 'var(--text-muted)' },
-    ]
-
-    const priorityBadge = (p: string) => {
-      if (p === 'critical') return '<span class="badge badge-red">Crítica</span>'
-      if (p === 'high') return '<span class="badge badge-yellow">Alta</span>'
-      if (p === 'medium') return '<span class="badge badge-blue">Media</span>'
-      return '<span class="badge badge-green">Baja</span>'
-    }
-    const statusBadge = (s: string) => {
-      if (s === 'active') return '<span class="badge badge-green">Activo</span>'
-      if (s === 'at-risk') return '<span class="badge badge-red">En riesgo</span>'
-      if (s === 'planning') return '<span class="badge badge-purple">Planificación</span>'
-      return '<span class="badge badge-blue">' + s + '</span>'
-    }
-
-    const projectCards = projects.map((p: Record<string, unknown>) => `
-      <div class="card" style="padding:1.2rem">
-        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:0.8rem">
-          <div>
-            <h4 style="font-size:0.95rem;font-weight:700;margin-bottom:4px">${p.name}</h4>
-            <div style="display:flex;gap:6px;align-items:center">
-              ${statusBadge(p.status as string)} ${priorityBadge(p.priority as string)}
-            </div>
-          </div>
-          <div style="text-align:right;font-size:0.72rem;color:var(--text-muted)">
-            <div>Deadline: <strong style="color:var(--text)">${p.deadline}</strong></div>
-            <div style="margin-top:2px">👥 ${p.team} miembros</div>
-          </div>
-        </div>
-        <div style="margin-bottom:0.5rem">
-          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-            <span style="font-size:0.72rem;color:var(--text-muted)">Tareas: ${p.tasks}</span>
-            <span style="font-size:0.72rem;font-weight:700;color:${p.color}">${p.progress}%</span>
-          </div>
-          <div class="bar-bg"><div class="bar-fill" data-width="${p.progress}%" style="width:0%;background:${p.color}"></div></div>
-        </div>
-      </div>`
-    ).join('')
-
-    const projContent = `
-      ${kpiGrid([
-        { icon: '📂', label: 'Total Proyectos', value: md?.totalProjects || 12 },
-        { icon: '🟢', label: 'En Tiempo', value: md?.onTrack || 5 },
-        { icon: '🟡', label: 'En Riesgo', value: md?.atRisk || 2 },
-        { icon: '🔵', label: 'Planificación', value: md?.planning || 3 },
-      ])}
-      <div class="grid-2" style="margin-top:1.5rem">
-        ${projectCards}
-      </div>`
-
-    const projSection = section('projects', 'PROYECTOS', 'Vista de Proyectos',
-      'Estado y progreso de todos los proyectos activos y en planificación.',
-      projContent)
-
-    // ── Tasks (Kanban)
-    const kanbanColumns = md?.kanban || {
-      todo: [
-        { title: 'Diseñar página de pricing', project: 'Rediseño Web', assignee: 'Ana G.', priority: 'high', points: 5 },
-        { title: 'Configurar CI/CD pipeline', project: 'Migración Cloud', assignee: 'Miguel T.', priority: 'critical', points: 8 },
-        { title: 'Crear wireframes dashboard', project: 'Portal Clientes', assignee: 'Sara D.', priority: 'medium', points: 3 },
-        { title: 'Documentar API endpoints', project: 'App Móvil v2.0', assignee: 'David L.', priority: 'low', points: 2 },
-      ],
-      inProgress: [
-        { title: 'Implementar autenticación OAuth', project: 'App Móvil v2.0', assignee: 'Carlos M.', priority: 'high', points: 8 },
-        { title: 'Migrar base de datos RDS', project: 'Migración Cloud', assignee: 'Miguel T.', priority: 'critical', points: 13 },
-        { title: 'Maquetación responsive home', project: 'Rediseño Web', assignee: 'Sara D.', priority: 'medium', points: 5 },
-      ],
-      review: [
-        { title: 'Testing E2E checkout flow', project: 'Portal Clientes', assignee: 'Laura F.', priority: 'high', points: 5 },
-        { title: 'Optimizar queries SQL', project: 'Sistema Facturación', assignee: 'David L.', priority: 'medium', points: 3 },
-      ],
-      done: [
-        { title: 'Setup repositorio monorepo', project: 'App Móvil v2.0', assignee: 'Carlos M.', priority: 'medium', points: 3 },
-        { title: 'Diseñar sistema de design tokens', project: 'Rediseño Web', assignee: 'Ana G.', priority: 'high', points: 8 },
-        { title: 'Configurar monitoring CloudWatch', project: 'Migración Cloud', assignee: 'Javier S.', priority: 'medium', points: 5 },
-      ],
-    }
-
-    const taskPriorityDot = (p: string) => {
-      if (p === 'critical') return '<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--danger);margin-right:4px"></span>'
-      if (p === 'high') return '<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--warning);margin-right:4px"></span>'
-      if (p === 'medium') return '<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--info);margin-right:4px"></span>'
-      return '<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--success);margin-right:4px"></span>'
-    }
-
-    const renderKanbanCard = (task: Record<string, unknown>) => `
-      <div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:10px;padding:0.8rem;margin-bottom:0.5rem">
-        <div style="font-size:0.8rem;font-weight:600;margin-bottom:6px">${taskPriorityDot(task.priority as string)}${task.title}</div>
-        <div style="font-size:0.65rem;color:var(--text-dim);margin-bottom:6px">${task.project}</div>
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <span style="font-size:0.65rem;color:var(--text-muted)">👤 ${task.assignee}</span>
-          <span class="badge badge-primary" style="font-size:0.58rem">${task.points} pts</span>
-        </div>
-      </div>`
-
-    const renderKanbanColumn = (title: string, tasks: Record<string, unknown>[], color: string, count: number) => `
-      <div style="flex:1;min-width:220px">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:0.8rem;padding-bottom:0.5rem;border-bottom:2px solid ${color}">
-          <span style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px">${title}</span>
-          <span style="background:${color};color:#fff;font-size:0.6rem;font-weight:700;padding:2px 8px;border-radius:100px">${count}</span>
-        </div>
-        ${tasks.map(renderKanbanCard).join('')}
-      </div>`
-
-    const tasksContent = `
-      ${kpiGrid([
-        { icon: '📋', label: 'Total Tareas', value: md?.totalTasks || 156 },
-        { icon: '🏃', label: 'En Progreso', value: md?.tasksInProgress || 32 },
-        { icon: '👀', label: 'En Review', value: md?.tasksInReview || 12 },
-        { icon: '✅', label: 'Completadas', value: md?.tasksCompleted || 104, trend: { value: '67%', direction: 'up' } },
-      ])}
-      <div class="card" style="margin-top:1.5rem;overflow-x:auto">
-        <div class="card-header"><h3>Tablero Kanban</h3><span class="badge badge-accent">Sprint 14</span></div>
-        <div style="display:flex;gap:1rem;min-width:900px;padding:0.5rem 0">
-          ${renderKanbanColumn('Por Hacer', kanbanColumns.todo, 'var(--text-muted)', kanbanColumns.todo.length)}
-          ${renderKanbanColumn('En Progreso', kanbanColumns.inProgress, 'var(--primary-light)', kanbanColumns.inProgress.length)}
-          ${renderKanbanColumn('En Review', kanbanColumns.review, 'var(--warning)', kanbanColumns.review.length)}
-          ${renderKanbanColumn('Hecho', kanbanColumns.done, 'var(--success)', kanbanColumns.done.length)}
-        </div>
-      </div>`
-
-    const tasksSection = section('tasks', 'TAREAS', 'Tablero de Tareas',
-      'Vista kanban con todas las tareas del sprint actual organizadas por estado.',
-      tasksContent)
-
-    // ── Team
-    const teamMembers = md?.team || [
-      { name: 'Ana García', role: 'UX/UI Designer', avatar: 'AG', currentTask: 'Diseñar página de pricing', project: 'Rediseño Web', capacity: 85, tasks: 6 },
-      { name: 'Carlos Martínez', role: 'Senior Developer', avatar: 'CM', currentTask: 'Implementar autenticación OAuth', project: 'App Móvil v2.0', capacity: 92, tasks: 8 },
-      { name: 'Miguel Torres', role: 'DevOps Engineer', avatar: 'MT', currentTask: 'Migrar base de datos RDS', project: 'Migración Cloud', capacity: 100, tasks: 7 },
-      { name: 'Sara Díaz', role: 'Frontend Developer', avatar: 'SD', currentTask: 'Maquetación responsive home', project: 'Rediseño Web', capacity: 78, tasks: 5 },
-      { name: 'Laura Fernández', role: 'QA Engineer', avatar: 'LF', currentTask: 'Testing E2E checkout flow', project: 'Portal Clientes', capacity: 65, tasks: 4 },
-      { name: 'David López', role: 'Backend Developer', avatar: 'DL', currentTask: 'Optimizar queries SQL', project: 'Sistema Facturación', capacity: 70, tasks: 5 },
-      { name: 'Javier Sánchez', role: 'Tech Lead', avatar: 'JS', currentTask: 'Code review PRs pendientes', project: 'Varios', capacity: 55, tasks: 3 },
-      { name: 'Elena Rodríguez', role: 'Product Manager', avatar: 'ER', currentTask: 'Planificación Sprint 15', project: 'Todos', capacity: 60, tasks: 4 },
-    ]
-
-    const memberCards = teamMembers.map((m: Record<string, unknown>) => {
-      const cap = m.capacity as number
-      const capColor = cap >= 90 ? 'var(--danger)' : cap >= 70 ? 'var(--warning)' : 'var(--success)'
-      return `
-      <div class="card" style="padding:1.2rem">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:0.8rem">
-          <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.75rem;color:#fff;flex-shrink:0">${m.avatar}</div>
-          <div>
-            <div style="font-weight:700;font-size:0.88rem">${m.name}</div>
-            <div style="font-size:0.68rem;color:var(--text-muted)">${m.role}</div>
-          </div>
-        </div>
-        <div style="font-size:0.72rem;color:var(--text-dim);margin-bottom:4px">Tarea actual:</div>
-        <div style="font-size:0.78rem;color:var(--text);margin-bottom:2px;font-weight:500">${m.currentTask}</div>
-        <div style="font-size:0.65rem;color:var(--accent);margin-bottom:0.8rem">${m.project}</div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-          <span style="font-size:0.65rem;color:var(--text-muted)">Capacidad</span>
-          <span style="font-size:0.65rem;font-weight:700;color:${capColor}">${cap}%</span>
-        </div>
-        <div class="bar-bg"><div class="bar-fill" data-width="${cap}%" style="width:0%;background:${capColor}"></div></div>
-        <div style="font-size:0.62rem;color:var(--text-dim);margin-top:6px">${m.tasks} tareas asignadas</div>
-      </div>`
-    }).join('')
-
-    const teamContent = `
-      ${kpiGrid([
-        { icon: '👥', label: 'Miembros del Equipo', value: md?.teamSize || 14 },
-        { icon: '📊', label: 'Capacidad Media', value: md?.avgCapacity || 76, suffix: '%' },
-        { icon: '🔥', label: 'Sobrecargados', value: md?.overloaded || 2, trend: { value: '>90%', direction: 'down' } },
-        { icon: '⚡', label: 'Productividad', value: md?.productivity || 94, suffix: '%', trend: { value: '+3%', direction: 'up' } },
-      ])}
-      <div class="grid-4" style="margin-top:1.5rem">
-        ${memberCards}
-      </div>`
-
-    const teamSection = section('team', 'EQUIPO', 'Gestión del Equipo',
-      'Visualiza la carga de trabajo, tareas asignadas y capacidad de cada miembro.',
-      teamContent)
-
-    // ── Timeline
-    const timelineProjects = md?.timeline || [
-      { name: 'Rediseño Web Corporativa', start: 'Feb 2026', end: 'Abr 2026', progress: 85, color: 'var(--success)', offset: 10, width: 55 },
-      { name: 'App Móvil v2.0', start: 'Ene 2026', end: 'Jun 2026', progress: 62, color: 'var(--primary-light)', offset: 0, width: 80 },
-      { name: 'Migración Cloud AWS', start: 'Mar 2026', end: 'Abr 2026', progress: 45, color: 'var(--warning)', offset: 25, width: 25 },
-      { name: 'Portal de Clientes', start: 'Mar 2026', end: 'May 2026', progress: 78, color: 'var(--accent)', offset: 25, width: 40 },
-      { name: 'Sistema de Facturación', start: 'Mar 2026', end: 'Jul 2026', progress: 30, color: 'var(--primary-light)', offset: 25, width: 60 },
-      { name: 'Integración CRM', start: 'May 2026', end: 'Ago 2026', progress: 10, color: 'var(--text-muted)', offset: 50, width: 45 },
-    ]
-
-    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago']
-    const monthHeaders = months.map(m => `<div style="flex:1;text-align:center;font-size:0.62rem;color:var(--text-dim);font-weight:600;text-transform:uppercase;letter-spacing:1px">${m}</div>`).join('')
-
-    const ganttRows = timelineProjects.map((p: Record<string, unknown>) => `
-      <div style="display:grid;grid-template-columns:200px 1fr;gap:1rem;align-items:center;padding:0.6rem 0;border-bottom:1px solid var(--border)">
-        <div>
-          <div style="font-size:0.78rem;font-weight:600">${p.name}</div>
-          <div style="font-size:0.62rem;color:var(--text-muted)">${p.start} — ${p.end}</div>
-        </div>
-        <div style="position:relative;height:28px;background:rgba(255,255,255,0.02);border-radius:6px">
-          <div style="position:absolute;left:${p.offset}%;width:${p.width}%;height:100%;background:rgba(255,255,255,0.04);border-radius:6px;overflow:hidden">
-            <div class="bar-fill" data-width="${(p.progress as number)}%" style="width:0%;height:100%;background:${p.color};border-radius:6px;position:relative">
-              <span style="position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:0.6rem;font-weight:700;color:#fff">${p.progress}%</span>
-            </div>
-          </div>
-        </div>
-      </div>`
-    ).join('')
-
-    const timelineContent = `
-      <div class="card">
-        <div class="card-header"><h3>Roadmap de Proyectos</h3><span class="badge badge-accent">2026</span></div>
-        <div style="padding:0.5rem 0">
-          <div style="display:grid;grid-template-columns:200px 1fr;gap:1rem;margin-bottom:0.5rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border)">
-            <div style="font-size:0.65rem;color:var(--text-dim);font-weight:700;text-transform:uppercase;letter-spacing:1px">Proyecto</div>
-            <div style="display:flex">${monthHeaders}</div>
-          </div>
-          <div style="position:relative">
-            <div style="position:absolute;left:200px;right:0;top:0;bottom:0;display:flex;pointer-events:none;z-index:0">
-              ${months.map((_, i) => `<div style="flex:1;border-left:1px dashed rgba(255,255,255,0.04);${i === 3 ? 'border-left-color:rgba(239,68,68,0.3);' : ''}"></div>`).join('')}
-            </div>
-            ${ganttRows}
-          </div>
-          <div style="margin-top:0.8rem;display:flex;gap:1rem;font-size:0.62rem;color:var(--text-dim)">
-            <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:3px;background:rgba(239,68,68,0.3);border-radius:2px"></span>Hoy (Abril)</span>
-            <span>Barra = duración planificada</span>
-            <span>% = progreso real</span>
-          </div>
-        </div>
-      </div>
-      <div class="grid-2" style="margin-top:1.5rem">
-        <div class="card">
-          <div class="card-header"><h3>Próximos Deadlines</h3></div>
-          ${alertRow('🔴', 'Migración Cloud AWS — 14/04/2026', '5 días', 'badge-red')}
-          ${alertRow('🟡', 'Rediseño Web Corporativa — 30/04/2026', '21 días', 'badge-yellow')}
-          ${alertRow('🟢', 'Portal de Clientes — 20/05/2026', '41 días', 'badge-green')}
-          ${alertRow('🔵', 'App Móvil v2.0 — 15/06/2026', '67 días', 'badge-blue')}
-          ${alertRow('🟣', 'Sistema de Facturación — 31/07/2026', '113 días', 'badge-purple')}
-        </div>
-        <div class="card">
-          <div class="card-header"><h3>Hitos Completados</h3></div>
-          ${alertRow('✅', 'Setup monorepo — App Móvil v2.0', 'Completado', 'badge-green')}
-          ${alertRow('✅', 'Design system tokens — Rediseño Web', 'Completado', 'badge-green')}
-          ${alertRow('✅', 'MVP Portal Clientes — Fase 1', 'Completado', 'badge-green')}
-          ${alertRow('✅', 'Infraestructura base — Migración Cloud', 'Completado', 'badge-green')}
-          ${alertRow('⏳', 'Auth module — App Móvil v2.0', 'En progreso', 'badge-yellow')}
-        </div>
-      </div>`
-
-    const timelineSection = section('timeline', 'TIMELINE', 'Línea Temporal',
-      'Visualización tipo Gantt del roadmap de proyectos con progreso real.',
-      timelineContent)
-
-    // ── Analytics
-    const velocityByWeek: BarChartItem[] = md?.velocityByWeek || [
-      { label: 'Semana 12', value: 35, color: 'var(--primary-light)' },
-      { label: 'Semana 13', value: 38, color: 'var(--primary-light)' },
-      { label: 'Semana 14', value: 42, color: 'var(--accent)' },
-      { label: 'Semana 15 (actual)', value: 40, color: 'var(--accent)' },
-    ]
-
-    const anaContent = `
-      ${bigResult(
-        md?.totalDelivered || '342',
-        md?.totalDeliveredLabel || 'Story Points Entregados (Q1-Q2 2026)',
-        [
-          { title: '28 días', subtitle: 'Tiempo Medio por Proyecto' },
-          { title: '42 pts', subtitle: 'Velocity Promedio' },
-          { title: '94%', subtitle: 'Entrega a Tiempo' },
-        ]
-      )}
-      <div class="grid-2" style="margin-top:1.5rem">
-        <div class="card">
-          <div class="card-header"><h3>Velocity por Sprint</h3><span class="badge badge-accent">Últimas 4 semanas</span></div>
-          ${horizontalBarChart(velocityByWeek, 50)}
-        </div>
-        <div class="card">
-          <div class="card-header"><h3>Métricas de Equipo</h3></div>
-          ${progressBar('Tareas Completadas a Tiempo', md?.onTimePct || 88, 'primary')}
-          ${progressBar('Code Review < 24h', md?.reviewTimePct || 76, 'accent')}
-          ${progressBar('Sprint Goal Achievement', md?.sprintGoalPct || 92, 'ok')}
-          ${progressBar('Bug Fix Rate', md?.bugFixRate || 95, 'primary')}
-          ${progressBar('Documentation Coverage', md?.docCoverage || 64, 'warn')}
-        </div>
-      </div>
-      <div class="grid-2" style="margin-top:1.5rem">
-        <div class="card">
-          <div class="card-header"><h3>Tareas por Tipo</h3></div>
-          ${horizontalBarChart([
-            { label: 'Feature', value: 62, color: 'var(--primary-light)' },
-            { label: 'Bug Fix', value: 28, color: 'var(--danger)' },
-            { label: 'Improvement', value: 34, color: 'var(--accent)' },
-            { label: 'Technical Debt', value: 18, color: 'var(--warning)' },
-            { label: 'Documentation', value: 14, color: 'var(--info)' },
-          ])}
-        </div>
-        <div class="card">
-          <div class="card-header"><h3>Burndown Sprint 14</h3></div>
-          ${horizontalBarChart([
-            { label: 'Día 1 (Lunes)', value: 42, color: 'var(--text-muted)' },
-            { label: 'Día 3 (Miércoles)', value: 34, color: 'var(--primary-light)' },
-            { label: 'Día 5 (Viernes)', value: 26, color: 'var(--primary-light)' },
-            { label: 'Día 8 (Miércoles)', value: 18, color: 'var(--accent)' },
-            { label: 'Día 10 (Viernes)', value: 8, color: 'var(--success)' },
-          ], 50)}
-          <div style="font-size:0.65rem;color:var(--text-dim);margin-top:0.5rem">* Story points restantes</div>
-        </div>
-      </div>`
-
-    const anaSection = section('analytics', 'ANALYTICS', 'Productividad del Equipo',
-      'Métricas de velocity, delivery y rendimiento del equipo de desarrollo.',
-      anaContent)
-
-    // ── Settings
-    const settFields: SettingsField[] = [
-      { label: 'Nombre del Workspace', value: c.businessName, type: 'text' },
-      { label: 'Email Project Manager', value: md?.pmEmail || 'pm@empresa.com', type: 'email' },
-      { label: 'Duración del Sprint', value: md?.sprintDuration || '2 semanas', type: 'select', options: ['1 semana', '2 semanas', '3 semanas', '4 semanas'] },
-      { label: 'Metodología', value: md?.methodology || 'Scrum', type: 'select', options: ['Scrum', 'Kanban', 'Scrumban', 'Waterfall'] },
-      { label: 'Notificaciones de Deadline', value: '', type: 'toggle', enabled: true },
-      { label: 'Daily Standup Automático', value: '', type: 'toggle', enabled: true },
-      { label: 'Integración con Slack', value: '', type: 'toggle', enabled: false },
-      { label: 'Idioma', value: 'Español', type: 'select', options: ['Español', 'English', 'Português'] },
-    ]
-
-    const settContent = settingsForm(settFields)
-
-    const settSection = section('settings', 'CONFIGURACIÓN', 'Ajustes del Proyecto',
-      'Personaliza sprints, metodología, notificaciones e integraciones.',
-      settContent)
-
-    // ── Footer
-    const footer = `<div class="footer">&copy; 2026 ${c.businessName} — Prototipo generado por <strong style="color:var(--accent)">Kerno Studio</strong></div>`
-
-    // ── Assemble
     return `<!DOCTYPE html>
 <html lang="${c.locale || 'es'}">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${c.businessName} — Demo Interactivo</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>${biz} — Project Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700;800;900&display=swap');
-${designSystemCSS(c.primaryColor, c.accentColor, c.theme || 'neon')}
-body { font-family: 'Work Sans', sans-serif; background: #0e0f14; }
-.data-tbl { font-family: 'Work Sans', sans-serif; }
-.card { border-radius: 14px; }
-.kpi { border-radius: 14px; }
-.badge { letter-spacing: 0.5px; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:${p};
+  --accent:${a};
+  --sidebar-bg:#12111e;
+  --content-bg:#0e0d1a;
+  --card-bg:#18172a;
+  --card-border:#252340;
+  --text:#e8e6f0;
+  --text-dim:#8b87a8;
+  --text-muted:#5a5680;
+  --success:#10b981;
+  --warning:#f59e0b;
+  --danger:#ef4444;
+  --info:#3b82f6;
+  --purple:#a78bfa;
+  --sidebar-w:250px;
+  --navbar-h:56px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Work Sans',sans-serif;background:var(--content-bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* ── SIDEBAR ── */
+.sidebar{position:fixed;top:0;left:0;width:var(--sidebar-w);height:100vh;background:var(--sidebar-bg);border-right:1px solid var(--card-border);z-index:100;display:flex;flex-direction:column;transition:transform .3s}
+.sidebar-brand{padding:20px 24px;font-size:1.1rem;font-weight:800;color:var(--primary);border-bottom:1px solid var(--card-border);letter-spacing:-0.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-nav{flex:1;padding:12px 0;overflow-y:auto}
+.sidebar-link{display:flex;align-items:center;gap:12px;padding:11px 24px;color:var(--text-dim);font-size:0.85rem;font-weight:500;cursor:pointer;transition:all .2s;border-left:3px solid transparent;text-decoration:none}
+.sidebar-link:hover{color:var(--text);background:rgba(255,255,255,0.04)}
+.sidebar-link.active{color:var(--primary);background:rgba(99,102,241,0.08);border-left-color:var(--primary)}
+.sidebar-link .icon{font-size:1rem;width:20px;text-align:center}
+.sidebar-footer{padding:16px 24px;border-top:1px solid var(--card-border);font-size:0.7rem;color:var(--text-muted)}
+
+/* ── NAVBAR ── */
+.navbar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--navbar-h);background:var(--sidebar-bg);border-bottom:1px solid var(--card-border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;z-index:99}
+.navbar-title{font-size:0.95rem;font-weight:600;color:var(--text)}
+.navbar-right{display:flex;align-items:center;gap:16px}
+.navbar-badge{background:var(--primary);color:#fff;font-size:0.65rem;padding:3px 10px;border-radius:20px;font-weight:700}
+.navbar-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:#fff}
+.menu-toggle{display:none;background:none;border:none;color:var(--text);font-size:1.3rem;cursor:pointer}
+
+/* ── MAIN CONTENT ── */
+.main{margin-left:var(--sidebar-w);margin-top:var(--navbar-h);padding:28px;min-height:calc(100vh - var(--navbar-h))}
+.page-section{display:none;animation:fadeUp .4s ease}
+.page-section.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── SECTION HEADER ── */
+.section-header{margin-bottom:24px}
+.section-header .label{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--primary);margin-bottom:6px}
+.section-header h2{font-size:1.6rem;font-weight:800;letter-spacing:-0.5px;margin-bottom:4px}
+.section-header p{font-size:0.85rem;color:var(--text-dim)}
+
+/* ── CARDS ── */
+.card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:20px;margin-bottom:16px;transition:border-color .2s}
+.card:hover{border-color:rgba(255,255,255,0.1)}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-header h3{font-size:0.95rem;font-weight:700}
+
+/* ── KPI GRID ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+.kpi{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:20px;text-align:center;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--primary),var(--accent));opacity:0;transition:opacity .3s}
+.kpi:hover::before{opacity:1}
+.kpi .kpi-icon{font-size:1.5rem;margin-bottom:8px}
+.kpi .kpi-value{font-size:1.8rem;font-weight:800;color:var(--text);letter-spacing:-1px}
+.kpi .kpi-value.counter{color:var(--primary)}
+.kpi .kpi-label{font-size:0.72rem;color:var(--text-dim);margin-top:4px;font-weight:500}
+.kpi .kpi-trend{font-size:0.65rem;margin-top:6px;font-weight:600}
+.kpi .kpi-trend.up{color:var(--success)}
+.kpi .kpi-trend.down{color:var(--danger)}
+
+/* ── GRIDS ── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+
+/* ── BADGES ── */
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:0.65rem;font-weight:700}
+.badge-green{background:rgba(16,185,129,0.15);color:#34d399}
+.badge-red{background:rgba(239,68,68,0.15);color:#f87171}
+.badge-yellow{background:rgba(245,158,11,0.15);color:#fbbf24}
+.badge-blue{background:rgba(59,130,246,0.15);color:#60a5fa}
+.badge-purple{background:rgba(167,139,250,0.15);color:#a78bfa}
+.badge-primary{background:rgba(99,102,241,0.15);color:var(--primary)}
+.badge-accent{background:rgba(139,92,246,0.15);color:var(--accent)}
+.badge-indigo{background:rgba(99,102,241,0.15);color:#818cf8}
+
+/* ── HORIZONTAL BAR ── */
+.hbar{margin-bottom:12px}
+.hbar-label{display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:4px}
+.hbar-label span:first-child{color:var(--text-dim)}
+.hbar-label span:last-child{color:var(--text);font-weight:600}
+.hbar-track{height:8px;background:rgba(255,255,255,0.06);border-radius:8px;overflow:hidden}
+.hbar-fill{height:100%;border-radius:8px;transition:width 1s ease;background:var(--primary)}
+
+/* ── PROGRESS BAR ── */
+.progress-row{margin-bottom:14px}
+.progress-label{display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:4px}
+.progress-label span:first-child{color:var(--text-dim)}
+.progress-label span:last-child{font-weight:700;color:var(--text)}
+.progress-track{height:6px;background:rgba(255,255,255,0.06);border-radius:6px;overflow:hidden}
+.progress-fill{height:100%;border-radius:6px;transition:width 1.2s ease}
+
+/* ── TABLES ── */
+.data-tbl{width:100%;border-collapse:collapse;font-size:0.8rem}
+.data-tbl thead th{text-align:left;padding:10px 14px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);border-bottom:1px solid var(--card-border)}
+.data-tbl tbody td{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--text-dim)}
+.data-tbl tbody tr:hover{background:rgba(255,255,255,0.02)}
+
+/* ── PROJECT CARDS ── */
+.project-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.project-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:20px;transition:all .2s;cursor:pointer}
+.project-card:hover{border-color:var(--primary);transform:translateY(-2px);box-shadow:0 8px 30px rgba(99,102,241,0.1)}
+.project-card .pc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.project-card .pc-title{font-size:0.92rem;font-weight:700;color:var(--text)}
+.project-card .pc-desc{font-size:0.75rem;color:var(--text-dim);margin-bottom:14px;line-height:1.4}
+.project-card .pc-progress{margin-bottom:12px}
+.project-card .pc-progress-label{display:flex;justify-content:space-between;font-size:0.7rem;color:var(--text-dim);margin-bottom:4px}
+.project-card .pc-progress-track{height:6px;background:rgba(255,255,255,0.06);border-radius:6px;overflow:hidden}
+.project-card .pc-progress-fill{height:100%;border-radius:6px;transition:width 1.2s ease;background:var(--primary)}
+.project-card .pc-footer{display:flex;align-items:center;justify-content:space-between}
+.project-card .pc-team{display:flex}
+.project-card .pc-avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;font-size:0.55rem;font-weight:700;color:#fff;margin-left:-6px;border:2px solid var(--card-bg)}
+.project-card .pc-avatar:first-child{margin-left:0}
+.project-card .pc-deadline{font-size:0.68rem;color:var(--text-muted)}
+
+/* ── KANBAN ── */
+.kanban{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;min-height:400px}
+.kanban-col{background:rgba(255,255,255,0.02);border-radius:14px;padding:14px;border:1px solid var(--card-border)}
+.kanban-col-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--card-border)}
+.kanban-col-title{font-size:0.78rem;font-weight:700;color:var(--text)}
+.kanban-col-count{font-size:0.65rem;background:rgba(255,255,255,0.08);padding:2px 8px;border-radius:10px;color:var(--text-dim)}
+.kanban-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:14px;margin-bottom:10px;cursor:grab;transition:all .2s;box-shadow:0 2px 8px rgba(0,0,0,0.15)}
+.kanban-card:hover{border-color:var(--primary);box-shadow:0 4px 16px rgba(99,102,241,0.15);transform:translateY(-1px)}
+.kanban-card .kc-title{font-size:0.8rem;font-weight:600;color:var(--text);margin-bottom:8px}
+.kanban-card .kc-meta{display:flex;align-items:center;justify-content:space-between;font-size:0.68rem;color:var(--text-dim)}
+.kanban-card .kc-assignee{display:flex;align-items:center;gap:6px}
+.kanban-card .kc-avatar{width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;font-size:0.5rem;font-weight:700;color:#fff}
+.kanban-card .kc-due{font-size:0.62rem;color:var(--text-muted)}
+.priority-high{border-left:3px solid var(--danger)}
+.priority-medium{border-left:3px solid var(--warning)}
+.priority-low{border-left:3px solid var(--success)}
+
+/* ── TEAM CARDS ── */
+.team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.team-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:20px;text-align:center;transition:border-color .2s}
+.team-card:hover{border-color:var(--primary)}
+.team-card .tc-avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700;color:#fff;margin:0 auto 12px}
+.team-card .tc-name{font-size:0.88rem;font-weight:700;color:var(--text)}
+.team-card .tc-role{font-size:0.72rem;color:var(--text-dim);margin-top:2px}
+.team-card .tc-task{font-size:0.7rem;color:var(--text-muted);margin-top:10px;padding:8px;background:rgba(255,255,255,0.03);border-radius:8px}
+.team-card .tc-capacity{margin-top:12px}
+.team-card .tc-cap-label{display:flex;justify-content:space-between;font-size:0.65rem;color:var(--text-dim);margin-bottom:4px}
+.team-card .tc-cap-track{height:5px;background:rgba(255,255,255,0.06);border-radius:5px;overflow:hidden}
+.team-card .tc-cap-fill{height:100%;border-radius:5px;transition:width 1.2s ease}
+
+/* ── GANTT / TIMELINE ── */
+.gantt{overflow-x:auto}
+.gantt-table{width:100%;min-width:700px;border-collapse:collapse}
+.gantt-table th{font-size:0.65rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.8px;padding:8px 12px;border-bottom:1px solid var(--card-border);text-align:center}
+.gantt-table th:first-child{text-align:left;width:180px}
+.gantt-table td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.03);position:relative;height:42px}
+.gantt-table td:first-child{font-size:0.78rem;font-weight:600;color:var(--text)}
+.gantt-bar{position:absolute;top:50%;transform:translateY(-50%);height:22px;border-radius:6px;opacity:0.8;transition:opacity .2s}
+.gantt-bar:hover{opacity:1}
+.gantt-month{background:rgba(255,255,255,0.02)}
+
+/* ── ALERT ROWS ── */
+.alert-row{display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.8rem}
+.alert-row:last-child{border-bottom:none}
+.alert-row .alert-icon{font-size:1.1rem}
+.alert-row .alert-text{flex:1;color:var(--text-dim)}
+.alert-row .alert-badge{flex-shrink:0}
+
+/* ── SETTINGS ── */
+.settings-group{margin-bottom:20px}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.setting-row:last-child{border-bottom:none}
+.setting-label{font-size:0.82rem;color:var(--text-dim);font-weight:500}
+.setting-input{background:rgba(255,255,255,0.06);border:1px solid var(--card-border);color:var(--text);padding:8px 14px;border-radius:10px;font-size:0.8rem;font-family:'Work Sans',sans-serif;width:240px}
+.setting-input:focus{outline:none;border-color:var(--primary)}
+.toggle{width:44px;height:24px;background:rgba(255,255,255,0.1);border-radius:24px;position:relative;cursor:pointer;transition:background .3s;border:none}
+.toggle.on{background:var(--primary)}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .3s}
+.toggle.on::after{transform:translateX(20px)}
+
+/* ── NOTIFICATION ── */
+.notif-container{position:fixed;top:70px;right:20px;z-index:200;display:flex;flex-direction:column;gap:8px}
+.notif{background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:12px 18px;display:flex;align-items:center;gap:10px;font-size:0.8rem;animation:slideIn .3s ease;box-shadow:0 8px 30px rgba(0,0,0,0.4);min-width:280px}
+.notif .notif-icon{font-size:1.1rem}
+.notif .notif-text{flex:1}
+.notif .notif-title{font-weight:700;font-size:0.78rem}
+.notif .notif-msg{color:var(--text-dim);font-size:0.7rem;margin-top:2px}
+@keyframes slideIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+
+/* ── FOOTER ── */
+.footer{text-align:center;padding:28px;color:var(--text-muted);font-size:0.72rem;border-top:1px solid var(--card-border);margin-top:40px}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1200px){
+  .project-grid{grid-template-columns:repeat(2,1fr)}
+  .team-grid{grid-template-columns:repeat(2,1fr)}
+  .kanban{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:1024px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .grid-2{grid-template-columns:1fr}
+}
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .navbar{left:0}
+  .main{margin-left:0}
+  .menu-toggle{display:block}
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .project-grid{grid-template-columns:1fr}
+  .team-grid{grid-template-columns:1fr 1fr}
+  .kanban{grid-template-columns:1fr}
+  .setting-input{width:160px}
+}
+@media(max-width:480px){
+  .kpi-grid{grid-template-columns:1fr}
+  .team-grid{grid-template-columns:1fr}
+  .main{padding:16px}
+}
 </style>
 </head>
 <body>
-${nav}
-${notificationContainer()}
-${hero}
-${dashSection}
-${projSection}
-${tasksSection}
-${teamSection}
-${timelineSection}
-${anaSection}
-${settSection}
-${footer}
-<script>${allScripts()}</script>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">${biz}</div>
+  <nav class="sidebar-nav">
+    <a class="sidebar-link active" data-section="dashboard" onclick="showSection('dashboard')">
+      <span class="icon">◉</span> Dashboard
+    </a>
+    <a class="sidebar-link" data-section="projects" onclick="showSection('projects')">
+      <span class="icon">▤</span> Proyectos
+    </a>
+    <a class="sidebar-link" data-section="tasks" onclick="showSection('tasks')">
+      <span class="icon">☰</span> Tareas
+    </a>
+    <a class="sidebar-link" data-section="team" onclick="showSection('team')">
+      <span class="icon">◎</span> Equipo
+    </a>
+    <a class="sidebar-link" data-section="timeline" onclick="showSection('timeline')">
+      <span class="icon">⊞</span> Timeline
+    </a>
+    <a class="sidebar-link" data-section="analytics" onclick="showSection('analytics')">
+      <span class="icon">◈</span> Analytics
+    </a>
+    <a class="sidebar-link" data-section="settings" onclick="showSection('settings')">
+      <span class="icon">⚙</span> Config
+    </a>
+  </nav>
+  <div class="sidebar-footer">Powered by <strong style="color:var(--primary)">Kerno Studio</strong></div>
+</aside>
+
+<!-- NAVBAR -->
+<header class="navbar">
+  <div style="display:flex;align-items:center;gap:14px">
+    <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+    <span class="navbar-title" id="navTitle">Dashboard</span>
+  </div>
+  <div class="navbar-right">
+    <span class="navbar-badge">Sprint 14</span>
+    <div class="navbar-avatar">${biz.charAt(0).toUpperCase()}</div>
+  </div>
+</header>
+
+<!-- NOTIFICATION CONTAINER -->
+<div class="notif-container" id="notifContainer"></div>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+  <!-- ═══ DASHBOARD ═══ -->
+  <div class="page-section active" id="sec-dashboard">
+    <div class="section-header">
+      <div class="label">PROYECTOS</div>
+      <h2>Panel de Control</h2>
+      <p>Vista general de proyectos, tareas activas y rendimiento del equipo.</p>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-icon">📁</div>
+        <div class="kpi-value counter" data-target="8">0</div>
+        <div class="kpi-label">Proyectos Activos</div>
+        <div class="kpi-trend up">+2 este mes</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-icon">📋</div>
+        <div class="kpi-value counter" data-target="156">0</div>
+        <div class="kpi-label">Tareas Totales</div>
+        <div class="kpi-trend up">23 nuevas</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-icon">✅</div>
+        <div class="kpi-value"><span class="counter" data-target="67">0</span>%</div>
+        <div class="kpi-label">Completadas</div>
+        <div class="kpi-trend up">+12% vs sprint anterior</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-icon">👥</div>
+        <div class="kpi-value counter" data-target="14">0</div>
+        <div class="kpi-label">Miembros Equipo</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <h3>Progreso del Sprint 14</h3>
+          <span class="badge badge-primary">2 semanas</span>
+        </div>
+        <div class="progress-row"><div class="progress-label"><span>Sprint Progress</span><span>67%</span></div><div class="progress-track"><div class="progress-fill" style="width:0%;background:var(--primary)" data-width="67%"></div></div></div>
+        <div style="margin-top:16px">
+          <div class="hbar"><div class="hbar-label"><span>Completadas</span><span>42</span></div><div class="hbar-track"><div class="hbar-fill" style="width:0%;background:var(--success)" data-width="67%"></div></div></div>
+          <div class="hbar"><div class="hbar-label"><span>En Progreso</span><span>18</span></div><div class="hbar-track"><div class="hbar-fill" style="width:0%" data-width="29%"></div></div></div>
+          <div class="hbar"><div class="hbar-label"><span>Por Hacer</span><span>12</span></div><div class="hbar-track"><div class="hbar-fill" style="width:0%;background:var(--text-muted)" data-width="19%"></div></div></div>
+          <div class="hbar"><div class="hbar-label"><span>En Revisión</span><span>8</span></div><div class="hbar-track"><div class="hbar-fill" style="width:0%;background:var(--warning)" data-width="13%"></div></div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h3>Tareas Vencidas</h3>
+          <span class="badge badge-red">5 vencidas</span>
+        </div>
+        <div class="alert-row"><span class="alert-icon">🔴</span><span class="alert-text">Integración API pagos — <strong>vence hoy</strong></span><span class="alert-badge"><span class="badge badge-red">Alta</span></span></div>
+        <div class="alert-row"><span class="alert-icon">🔴</span><span class="alert-text">Testing E2E módulo checkout — <strong>1 día</strong></span><span class="alert-badge"><span class="badge badge-red">Alta</span></span></div>
+        <div class="alert-row"><span class="alert-icon">🟡</span><span class="alert-text">Diseño onboarding flow — <strong>2 días</strong></span><span class="alert-badge"><span class="badge badge-yellow">Media</span></span></div>
+        <div class="alert-row"><span class="alert-icon">🟡</span><span class="alert-text">Documentación API v2 — <strong>3 días</strong></span><span class="alert-badge"><span class="badge badge-yellow">Media</span></span></div>
+        <div class="alert-row"><span class="alert-icon">🟢</span><span class="alert-text">Actualizar dependencias — <strong>5 días</strong></span><span class="alert-badge"><span class="badge badge-green">Baja</span></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PROYECTOS ═══ -->
+  <div class="page-section" id="sec-projects">
+    <div class="section-header">
+      <div class="label">PROYECTOS</div>
+      <h2>Proyectos Activos</h2>
+      <p>Gestiona todos los proyectos con seguimiento de progreso, equipo y deadlines.</p>
+    </div>
+
+    <div class="project-grid">
+      <div class="project-card">
+        <div class="pc-header"><span class="pc-title">App Móvil v2</span><span class="badge badge-green">Activo</span></div>
+        <div class="pc-desc">Rediseño completo de la app móvil con nuevo sistema de navegación y funcionalidades premium.</div>
+        <div class="pc-progress"><div class="pc-progress-label"><span>Progreso</span><span>78%</span></div><div class="pc-progress-track"><div class="pc-progress-fill" style="width:0%" data-width="78%"></div></div></div>
+        <div class="pc-footer"><div class="pc-team"><div class="pc-avatar">AG</div><div class="pc-avatar">MT</div><div class="pc-avatar">SD</div></div><span class="pc-deadline">15 May 2026</span></div>
+      </div>
+      <div class="project-card">
+        <div class="pc-header"><span class="pc-title">Portal Clientes</span><span class="badge badge-green">Activo</span></div>
+        <div class="pc-desc">Nuevo portal self-service para clientes con dashboard personalizado y gestión de suscripciones.</div>
+        <div class="pc-progress"><div class="pc-progress-label"><span>Progreso</span><span>45%</span></div><div class="pc-progress-track"><div class="pc-progress-fill" style="width:0%" data-width="45%"></div></div></div>
+        <div class="pc-footer"><div class="pc-team"><div class="pc-avatar">CM</div><div class="pc-avatar">LF</div></div><span class="pc-deadline">30 Jun 2026</span></div>
+      </div>
+      <div class="project-card">
+        <div class="pc-header"><span class="pc-title">API v3</span><span class="badge badge-green">Activo</span></div>
+        <div class="pc-desc">Migración a nueva versión de API con GraphQL, rate limiting mejorado y documentación automática.</div>
+        <div class="pc-progress"><div class="pc-progress-label"><span>Progreso</span><span>62%</span></div><div class="pc-progress-track"><div class="pc-progress-fill" style="width:0%" data-width="62%"></div></div></div>
+        <div class="pc-footer"><div class="pc-team"><div class="pc-avatar">MT</div><div class="pc-avatar">JS</div><div class="pc-avatar">ER</div><div class="pc-avatar">DL</div></div><span class="pc-deadline">20 May 2026</span></div>
+      </div>
+      <div class="project-card">
+        <div class="pc-header"><span class="pc-title">Dashboard Analytics</span><span class="badge badge-yellow">On Hold</span></div>
+        <div class="pc-desc">Panel de analytics avanzado con visualizaciones interactivas, exportación y alertas inteligentes.</div>
+        <div class="pc-progress"><div class="pc-progress-label"><span>Progreso</span><span>25%</span></div><div class="pc-progress-track"><div class="pc-progress-fill" style="width:0%;background:var(--warning)" data-width="25%"></div></div></div>
+        <div class="pc-footer"><div class="pc-team"><div class="pc-avatar">SD</div><div class="pc-avatar">AG</div></div><span class="pc-deadline">15 Jul 2026</span></div>
+      </div>
+      <div class="project-card">
+        <div class="pc-header"><span class="pc-title">Migración Cloud</span><span class="badge badge-green">Activo</span></div>
+        <div class="pc-desc">Migración de infraestructura on-premise a AWS con containers y CI/CD automatizado.</div>
+        <div class="pc-progress"><div class="pc-progress-label"><span>Progreso</span><span>88%</span></div><div class="pc-progress-track"><div class="pc-progress-fill" style="width:0%;background:var(--success)" data-width="88%"></div></div></div>
+        <div class="pc-footer"><div class="pc-team"><div class="pc-avatar">MT</div><div class="pc-avatar">DL</div></div><span class="pc-deadline">30 Abr 2026</span></div>
+      </div>
+      <div class="project-card">
+        <div class="pc-header"><span class="pc-title">Sistema de Pagos</span><span class="badge badge-blue">Completed</span></div>
+        <div class="pc-desc">Integración de pasarela de pagos con Stripe, facturación automática y sistema de suscripciones.</div>
+        <div class="pc-progress"><div class="pc-progress-label"><span>Progreso</span><span>100%</span></div><div class="pc-progress-track"><div class="pc-progress-fill" style="width:0%;background:var(--success)" data-width="100%"></div></div></div>
+        <div class="pc-footer"><div class="pc-team"><div class="pc-avatar">JS</div><div class="pc-avatar">ER</div><div class="pc-avatar">CM</div></div><span class="pc-deadline">Completado</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ TAREAS (KANBAN) ═══ -->
+  <div class="page-section" id="sec-tasks">
+    <div class="section-header">
+      <div class="label">TAREAS</div>
+      <h2>Tablero Kanban</h2>
+      <p>Gestiona tareas del sprint actual con vista kanban interactiva.</p>
+    </div>
+
+    <div class="kanban">
+      <!-- POR HACER -->
+      <div class="kanban-col">
+        <div class="kanban-col-header"><span class="kanban-col-title">Por Hacer</span><span class="kanban-col-count">5</span></div>
+        <div class="kanban-card priority-high">
+          <div class="kc-title">Implementar autenticación OAuth</div>
+          <div class="kc-meta"><div class="kc-assignee"><div class="kc-avatar">MT</div>Miguel T.</div><span class="badge badge-red">Alta</span></div>
+          <div class="kc-due" style="margin-top:6px">Vence: 14 Abr</div>
+        </div>
+        <div class="kanban-card priority-medium">
+          <div class="kc-title">Diseñar pantalla de onboarding</div>
+          <div class="kc-meta"><div class="kc-assignee"><div class="kc-avatar">SD</div>Sara D.</div><span class="badge badge-yellow">Media</span></div>
+          <div class="kc-due" style="margin-top:6px">Vence: 16 Abr</div>
+        </div>
+        <div class="kanban-card priority-low">
+          <div class="kc-title">Actualizar documentación API</div>
+          <div class="kc-meta"><div class="kc-assignee"><div class="kc-avatar">DL</div>David L.</div><span class="badge badge-green">Baja</span></div>
+          <div class="kc-due" style="margin-top:6px">Vence: 20 Abr</div>
+        </div>
+        <div class="kanban-card priority-medium">
+          <div class="kc-title">Tests unitarios módulo users</div>
+          <div class="kc-meta"><div class="kc-assignee"><div class="kc-avatar">AG</div>Ana G.</div><span class="badge badge-yellow">Media</span></div>
+          <div class="kc-due" style="margin-top:6px">Vence: 18 Abr</div>
+        </div>
+        <div class="kanban-card priority-low">
+          <div class="kc-title">Optimizar queries dashboard</div>
+          <div class="kc-meta"><div class="kc-assignee"><div class="kc-avatar">ER</div>Elena R.</div><span class="badge badge-green">Baja</span></div>
+          <div class="kc-due" style="margin-top:6px">Vence: 22 Abr</div>
+        </div>
+      </div>
+      <!-- EN PROGRESO -->
+      <div class="kanban-col">
+        <div class="kanban-col-header"><span class="kanban-col-title">En Progreso</span><span class="kanban-col-count">4</span></div>
+        <div class="kanban-card priority-high">
+          <div class="kc-title">Integración API de pagos</div>
+          <div class="kc-meta"><div class="kc-assignee"><div class="kc-avatar">JS</div>Javier S.</div><span class="badge badge-red">Alta</span></div>
+          <div class="kc-due" style="margin-top:6px;color:var(--danger)">Vence: Hoy</div>
+        </div>
+        <div class="kanban-card priority-high">
+          <div class="kc-title">Migración base de datos</div>
+          <div class="kc-meta"><div class="kc-assignee"><div class="kc-avatar">MT</div>Miguel T.</div><span class="badge badge-red">Alta</span></div>
+          <div class="kc-due" style="margin-top:6px">Vence: 12 Abr</div>
+        </div>
+        <div class="kanban-card priority-medium">
+          <div class="kc-title">Rediseño página de perfil</div>
+          <div class="kc-meta"><div class="kc-assignee"><div class="kc-avatar">LF</div>Laura F.</div><span class="badge badge-yellow">Media</span></div>
+          <div class="kc-due" style="margin-top:6px">Vence: 15 Abr</div>
+        </div>
+        <div class="kanban-card priority-low">
+          <div class="kc-title">Configurar CI/CD pipeline</div>
+          <div class="kc-meta"><div class="kc-assignee"><div class="kc-avatar">DL</div>David L.</div><span class="badge badge-green">Baja</span></div>
+          <div class="kc-due" style="margin-top:6px">Vence: 18 Abr</div>
+        </div>
+      </div>
+      <!-- REVISION -->
+      <div class="kanban-col">
+        <div class="kanban-col-header"><span class="kanban-col-title">Revisión</span><span class="kanban-col-count">3</span></div>
+        <div class="kanban-card priority-high">
+          <div class="kc-title">Sistema de notificaciones push</div>
+          <div class="kc-meta"><div class="kc-assignee"><div class="kc-avatar">AG</div>Ana G.</div><span class="badge badge-red">Alta</span></div>
+          <div class="kc-due" style="margin-top:6px">Vence: 11 Abr</div>
+        </div>
+        <div class="kanban-card priority-medium">
+          <div class="kc-title">Refactoring módulo auth</div>
+          <div class="kc-meta"><div class="kc-assignee"><div class="kc-avatar">CM</div>Carlos M.</div><span class="badge badge-yellow">Media</span></div>
+          <div class="kc-due" style="margin-top:6px">Vence: 13 Abr</div>
+        </div>
+        <div class="kanban-card priority-low">
+          <div class="kc-title">Mejorar accesibilidad formularios</div>
+          <div class="kc-meta"><div class="kc-assignee"><div class="kc-avatar">SD</div>Sara D.</div><span class="badge badge-green">Baja</span></div>
+          <div class="kc-due" style="margin-top:6px">Vence: 16 Abr</div>
+        </div>
+      </div>
+      <!-- HECHO -->
+      <div class="kanban-col">
+        <div class="kanban-col-header"><span class="kanban-col-title">Hecho</span><span class="kanban-col-count">6</span></div>
+        <div class="kanban-card" style="opacity:0.7;border-left:3px solid var(--success)">
+          <div class="kc-title">Setup proyecto monorepo</div>
+          <div class="kc-meta"><div class="kc-assignee"><div class="kc-avatar">MT</div>Miguel T.</div><span class="badge badge-green">Done</span></div>
+        </div>
+        <div class="kanban-card" style="opacity:0.7;border-left:3px solid var(--success)">
+          <div class="kc-title">Diseño sistema de componentes</div>
+          <div class="kc-meta"><div class="kc-assignee"><div class="kc-avatar">SD</div>Sara D.</div><span class="badge badge-green">Done</span></div>
+        </div>
+        <div class="kanban-card" style="opacity:0.7;border-left:3px solid var(--success)">
+          <div class="kc-title">Integración con Stripe</div>
+          <div class="kc-meta"><div class="kc-assignee"><div class="kc-avatar">JS</div>Javier S.</div><span class="badge badge-green">Done</span></div>
+        </div>
+        <div class="kanban-card" style="opacity:0.7;border-left:3px solid var(--success)">
+          <div class="kc-title">Landing page v2</div>
+          <div class="kc-meta"><div class="kc-assignee"><div class="kc-avatar">LF</div>Laura F.</div><span class="badge badge-green">Done</span></div>
+        </div>
+        <div class="kanban-card" style="opacity:0.7;border-left:3px solid var(--success)">
+          <div class="kc-title">Configurar monitoring</div>
+          <div class="kc-meta"><div class="kc-assignee"><div class="kc-avatar">DL</div>David L.</div><span class="badge badge-green">Done</span></div>
+        </div>
+        <div class="kanban-card" style="opacity:0.7;border-left:3px solid var(--success)">
+          <div class="kc-title">Email templates transaccionales</div>
+          <div class="kc-meta"><div class="kc-assignee"><div class="kc-avatar">ER</div>Elena R.</div><span class="badge badge-green">Done</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ EQUIPO ═══ -->
+  <div class="page-section" id="sec-team">
+    <div class="section-header">
+      <div class="label">EQUIPO</div>
+      <h2>Miembros del Equipo</h2>
+      <p>Visualiza la capacidad, asignaciones y rendimiento de cada miembro.</p>
+    </div>
+
+    <div class="team-grid">
+      <div class="team-card">
+        <div class="tc-avatar">MT</div>
+        <div class="tc-name">Miguel Torres</div>
+        <div class="tc-role">Tech Lead</div>
+        <div class="tc-task">Migración base de datos</div>
+        <div class="tc-capacity"><div class="tc-cap-label"><span>Capacidad</span><span>92%</span></div><div class="tc-cap-track"><div class="tc-cap-fill" style="width:0%;background:var(--danger)" data-width="92%"></div></div></div>
+      </div>
+      <div class="team-card">
+        <div class="tc-avatar">AG</div>
+        <div class="tc-name">Ana García</div>
+        <div class="tc-role">Senior Developer</div>
+        <div class="tc-task">Sistema notificaciones push</div>
+        <div class="tc-capacity"><div class="tc-cap-label"><span>Capacidad</span><span>78%</span></div><div class="tc-cap-track"><div class="tc-cap-fill" style="width:0%;background:var(--primary)" data-width="78%"></div></div></div>
+      </div>
+      <div class="team-card">
+        <div class="tc-avatar">JS</div>
+        <div class="tc-name">Javier Sánchez</div>
+        <div class="tc-role">Backend Developer</div>
+        <div class="tc-task">Integración API pagos</div>
+        <div class="tc-capacity"><div class="tc-cap-label"><span>Capacidad</span><span>95%</span></div><div class="tc-cap-track"><div class="tc-cap-fill" style="width:0%;background:var(--danger)" data-width="95%"></div></div></div>
+      </div>
+      <div class="team-card">
+        <div class="tc-avatar">SD</div>
+        <div class="tc-name">Sara Díaz</div>
+        <div class="tc-role">Frontend Developer</div>
+        <div class="tc-task">Diseño onboarding flow</div>
+        <div class="tc-capacity"><div class="tc-cap-label"><span>Capacidad</span><span>65%</span></div><div class="tc-cap-track"><div class="tc-cap-fill" style="width:0%;background:var(--success)" data-width="65%"></div></div></div>
+      </div>
+      <div class="team-card">
+        <div class="tc-avatar">CM</div>
+        <div class="tc-name">Carlos Martínez</div>
+        <div class="tc-role">Product Manager</div>
+        <div class="tc-task">Refactoring módulo auth</div>
+        <div class="tc-capacity"><div class="tc-cap-label"><span>Capacidad</span><span>72%</span></div><div class="tc-cap-track"><div class="tc-cap-fill" style="width:0%;background:var(--primary)" data-width="72%"></div></div></div>
+      </div>
+      <div class="team-card">
+        <div class="tc-avatar">LF</div>
+        <div class="tc-name">Laura Fernández</div>
+        <div class="tc-role">UX Designer</div>
+        <div class="tc-task">Rediseño página perfil</div>
+        <div class="tc-capacity"><div class="tc-cap-label"><span>Capacidad</span><span>58%</span></div><div class="tc-cap-track"><div class="tc-cap-fill" style="width:0%;background:var(--success)" data-width="58%"></div></div></div>
+      </div>
+      <div class="team-card">
+        <div class="tc-avatar">DL</div>
+        <div class="tc-name">David López</div>
+        <div class="tc-role">DevOps Engineer</div>
+        <div class="tc-task">Configurar CI/CD pipeline</div>
+        <div class="tc-capacity"><div class="tc-cap-label"><span>Capacidad</span><span>81%</span></div><div class="tc-cap-track"><div class="tc-cap-fill" style="width:0%;background:var(--warning)" data-width="81%"></div></div></div>
+      </div>
+      <div class="team-card">
+        <div class="tc-avatar">ER</div>
+        <div class="tc-name">Elena Rodríguez</div>
+        <div class="tc-role">QA Engineer</div>
+        <div class="tc-task">Optimizar queries dashboard</div>
+        <div class="tc-capacity"><div class="tc-cap-label"><span>Capacidad</span><span>45%</span></div><div class="tc-cap-track"><div class="tc-cap-fill" style="width:0%;background:var(--success)" data-width="45%"></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ TIMELINE (GANTT) ═══ -->
+  <div class="page-section" id="sec-timeline">
+    <div class="section-header">
+      <div class="label">TIMELINE</div>
+      <h2>Cronograma de Proyectos</h2>
+      <p>Vista temporal de todos los proyectos con duraciones y solapamientos.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h3>Gantt — 2026</h3><span class="badge badge-primary">8 proyectos</span></div>
+      <div class="gantt">
+        <table class="gantt-table">
+          <thead>
+            <tr>
+              <th>Proyecto</th>
+              <th class="gantt-month">Ene</th>
+              <th class="gantt-month">Feb</th>
+              <th class="gantt-month">Mar</th>
+              <th class="gantt-month">Abr</th>
+              <th class="gantt-month">May</th>
+              <th class="gantt-month">Jun</th>
+              <th class="gantt-month">Jul</th>
+              <th class="gantt-month">Ago</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>App Móvil v2</td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month" style="position:relative"><div class="gantt-bar" style="background:var(--primary);left:0;right:-100%;width:calc(300% + 24px)"></div></td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month"></td>
+            </tr>
+            <tr>
+              <td>Portal Clientes</td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month" style="position:relative"><div class="gantt-bar" style="background:var(--accent);left:0;width:calc(400% + 36px)"></div></td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month"></td>
+            </tr>
+            <tr>
+              <td>API v3</td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month" style="position:relative"><div class="gantt-bar" style="background:var(--info);left:50%;width:calc(200% + 12px)"></div></td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month"></td>
+            </tr>
+            <tr>
+              <td>Dashboard Analytics</td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month" style="position:relative"><div class="gantt-bar" style="background:var(--warning);left:0;width:calc(300% + 24px)"></div></td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month"></td>
+            </tr>
+            <tr>
+              <td>Migración Cloud</td>
+              <td class="gantt-month" style="position:relative"><div class="gantt-bar" style="background:var(--success);left:0;width:calc(400% + 36px)"></div></td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month"></td>
+            </tr>
+            <tr>
+              <td>Sistema de Pagos</td>
+              <td class="gantt-month" style="position:relative"><div class="gantt-bar" style="background:var(--purple);left:0;width:calc(200% + 12px);opacity:0.5"></div></td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month"></td>
+              <td class="gantt-month"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:16px;font-size:0.65rem;color:var(--text-dim)">
+        <span><span style="display:inline-block;width:12px;height:4px;border-radius:2px;background:var(--primary);margin-right:4px"></span>App Móvil</span>
+        <span><span style="display:inline-block;width:12px;height:4px;border-radius:2px;background:var(--accent);margin-right:4px"></span>Portal</span>
+        <span><span style="display:inline-block;width:12px;height:4px;border-radius:2px;background:var(--info);margin-right:4px"></span>API v3</span>
+        <span><span style="display:inline-block;width:12px;height:4px;border-radius:2px;background:var(--warning);margin-right:4px"></span>Analytics</span>
+        <span><span style="display:inline-block;width:12px;height:4px;border-radius:2px;background:var(--success);margin-right:4px"></span>Cloud</span>
+        <span><span style="display:inline-block;width:12px;height:4px;border-radius:2px;background:var(--purple);opacity:0.5;margin-right:4px"></span>Pagos (done)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ANALYTICS ═══ -->
+  <div class="page-section" id="sec-analytics">
+    <div class="section-header">
+      <div class="label">ANALYTICS</div>
+      <h2>Productividad y Métricas</h2>
+      <p>Análisis detallado del rendimiento del equipo y estado de proyectos.</p>
+    </div>
+
+    <div class="card" style="text-align:center;padding:32px;margin-bottom:20px;background:linear-gradient(135deg,rgba(99,102,241,0.08),rgba(139,92,246,0.08))">
+      <div style="font-size:3rem;font-weight:800;color:var(--primary);letter-spacing:-2px"><span class="counter" data-target="67">0</span>%</div>
+      <div style="font-size:0.85rem;color:var(--text-dim);margin-top:4px">Sprint Completion Rate</div>
+      <div style="display:flex;gap:32px;justify-content:center;margin-top:20px">
+        <div><div style="font-size:1.3rem;font-weight:800;color:var(--text)">42</div><div style="font-size:0.7rem;color:var(--text-dim)">Tareas Completadas</div></div>
+        <div><div style="font-size:1.3rem;font-weight:800;color:var(--text)">2.4 días</div><div style="font-size:0.7rem;color:var(--text-dim)">Cycle Time Medio</div></div>
+        <div><div style="font-size:1.3rem;font-weight:800;color:var(--text)">94%</div><div style="font-size:0.7rem;color:var(--text-dim)">On-Time Delivery</div></div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><h3>Velocidad por Sprint</h3><span class="badge badge-primary">Story Points</span></div>
+        <div class="hbar"><div class="hbar-label"><span>Sprint 11</span><span>34 pts</span></div><div class="hbar-track"><div class="hbar-fill" style="width:0%" data-width="68%"></div></div></div>
+        <div class="hbar"><div class="hbar-label"><span>Sprint 12</span><span>41 pts</span></div><div class="hbar-track"><div class="hbar-fill" style="width:0%" data-width="82%"></div></div></div>
+        <div class="hbar"><div class="hbar-label"><span>Sprint 13</span><span>38 pts</span></div><div class="hbar-track"><div class="hbar-fill" style="width:0%;background:var(--accent)" data-width="76%"></div></div></div>
+        <div class="hbar"><div class="hbar-label"><span>Sprint 14 (actual)</span><span>45 pts</span></div><div class="hbar-track"><div class="hbar-fill" style="width:0%;background:var(--success)" data-width="90%"></div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>Distribución por Prioridad</h3></div>
+        <div class="progress-row"><div class="progress-label"><span>Alta</span><span>28 tareas</span></div><div class="progress-track"><div class="progress-fill" style="width:0%;background:var(--danger)" data-width="35%"></div></div></div>
+        <div class="progress-row"><div class="progress-label"><span>Media</span><span>52 tareas</span></div><div class="progress-track"><div class="progress-fill" style="width:0%;background:var(--warning)" data-width="65%"></div></div></div>
+        <div class="progress-row"><div class="progress-label"><span>Baja</span><span>24 tareas</span></div><div class="progress-track"><div class="progress-fill" style="width:0%;background:var(--success)" data-width="30%"></div></div></div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:16px">
+      <div class="card">
+        <div class="card-header"><h3>Rendimiento por Miembro</h3></div>
+        <div class="hbar"><div class="hbar-label"><span>Miguel Torres</span><span>18 tareas</span></div><div class="hbar-track"><div class="hbar-fill" style="width:0%" data-width="100%"></div></div></div>
+        <div class="hbar"><div class="hbar-label"><span>Ana García</span><span>15 tareas</span></div><div class="hbar-track"><div class="hbar-fill" style="width:0%;background:var(--accent)" data-width="83%"></div></div></div>
+        <div class="hbar"><div class="hbar-label"><span>Javier Sánchez</span><span>14 tareas</span></div><div class="hbar-track"><div class="hbar-fill" style="width:0%" data-width="78%"></div></div></div>
+        <div class="hbar"><div class="hbar-label"><span>Sara Díaz</span><span>12 tareas</span></div><div class="hbar-track"><div class="hbar-fill" style="width:0%;background:var(--accent)" data-width="67%"></div></div></div>
+        <div class="hbar"><div class="hbar-label"><span>David López</span><span>11 tareas</span></div><div class="hbar-track"><div class="hbar-fill" style="width:0%" data-width="61%"></div></div></div>
+        <div class="hbar"><div class="hbar-label"><span>Elena Rodríguez</span><span>10 tareas</span></div><div class="hbar-track"><div class="hbar-fill" style="width:0%;background:var(--accent)" data-width="56%"></div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>Estado de Proyectos</h3></div>
+        <div class="progress-row"><div class="progress-label"><span>Migración Cloud</span><span>88%</span></div><div class="progress-track"><div class="progress-fill" style="width:0%;background:var(--success)" data-width="88%"></div></div></div>
+        <div class="progress-row"><div class="progress-label"><span>App Móvil v2</span><span>78%</span></div><div class="progress-track"><div class="progress-fill" style="width:0%;background:var(--primary)" data-width="78%"></div></div></div>
+        <div class="progress-row"><div class="progress-label"><span>API v3</span><span>62%</span></div><div class="progress-track"><div class="progress-fill" style="width:0%;background:var(--info)" data-width="62%"></div></div></div>
+        <div class="progress-row"><div class="progress-label"><span>Portal Clientes</span><span>45%</span></div><div class="progress-track"><div class="progress-fill" style="width:0%;background:var(--accent)" data-width="45%"></div></div></div>
+        <div class="progress-row"><div class="progress-label"><span>Dashboard Analytics</span><span>25%</span></div><div class="progress-track"><div class="progress-fill" style="width:0%;background:var(--warning)" data-width="25%"></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ CONFIG ═══ -->
+  <div class="page-section" id="sec-settings">
+    <div class="section-header">
+      <div class="label">CONFIGURACION</div>
+      <h2>Ajustes del Proyecto</h2>
+      <p>Configura el entorno de trabajo, notificaciones y preferencias del equipo.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h3>General</h3></div>
+      <div class="settings-group">
+        <div class="setting-row"><span class="setting-label">Nombre del Workspace</span><input class="setting-input" type="text" value="${biz}"></div>
+        <div class="setting-row"><span class="setting-label">Metodología</span><select class="setting-input"><option>Scrum</option><option>Kanban</option><option>Híbrido</option></select></div>
+        <div class="setting-row"><span class="setting-label">Duración del Sprint</span><select class="setting-input"><option>1 semana</option><option selected>2 semanas</option><option>3 semanas</option><option>4 semanas</option></select></div>
+        <div class="setting-row"><span class="setting-label">Zona Horaria</span><select class="setting-input"><option>Europe/Madrid (UTC+2)</option><option>America/New_York</option><option>Asia/Tokyo</option></select></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>Notificaciones y Automatización</h3></div>
+      <div class="settings-group">
+        <div class="setting-row"><span class="setting-label">Notificaciones de tareas vencidas</span><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+        <div class="setting-row"><span class="setting-label">Resumen diario por email</span><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+        <div class="setting-row"><span class="setting-label">Alertas de bloqueos</span><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+        <div class="setting-row"><span class="setting-label">Auto-asignar reviewer</span><button class="toggle" onclick="this.classList.toggle('on')"></button></div>
+        <div class="setting-row"><span class="setting-label">Integración Slack</span><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+      </div>
+    </div>
+    <div style="margin-top:20px;text-align:right">
+      <button style="background:var(--primary);color:#fff;border:none;padding:10px 28px;border-radius:12px;font-size:0.85rem;font-weight:700;cursor:pointer;font-family:'Work Sans',sans-serif;transition:opacity .2s" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'" onclick="showNotif('saved')">Guardar Cambios</button>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">Powered by <strong style="color:var(--primary)">Kerno Studio</strong></div>
+</main>
+
+<script>
+// ── Section Navigation
+function showSection(id) {
+  document.querySelectorAll('.page-section').forEach(function(s){s.classList.remove('active')});
+  var sec = document.getElementById('sec-'+id);
+  if(sec) sec.classList.add('active');
+  document.querySelectorAll('.sidebar-link').forEach(function(l){l.classList.remove('active')});
+  var link = document.querySelector('.sidebar-link[data-section="'+id+'"]');
+  if(link) link.classList.add('active');
+  var titles = {dashboard:'Dashboard',projects:'Proyectos',tasks:'Tareas',team:'Equipo',timeline:'Timeline',analytics:'Analytics',settings:'Configuración'};
+  var navT = document.getElementById('navTitle');
+  if(navT) navT.textContent = titles[id]||id;
+  window.scrollTo(0,0);
+  animateCounters();
+  animateBars();
+}
+
+// ── Counter Animation
+function animateCounters(){
+  document.querySelectorAll('.page-section.active .counter').forEach(function(el){
+    var target = parseFloat(el.getAttribute('data-target'));
+    var decimals = parseInt(el.getAttribute('data-decimals'))||0;
+    if(isNaN(target)) return;
+    var duration = 1200;
+    var start = 0;
+    var startTime = null;
+    function step(ts){
+      if(!startTime) startTime=ts;
+      var progress = Math.min((ts-startTime)/duration,1);
+      var eased = 1-Math.pow(1-progress,3);
+      var current = start + (target-start)*eased;
+      if(target>=1000){
+        el.textContent = Math.round(current).toLocaleString('es-ES');
+      } else if(decimals>0){
+        el.textContent = current.toFixed(decimals);
+      } else {
+        el.textContent = Math.round(current);
+      }
+      if(progress<1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  });
+}
+
+// ── Bar Animation
+function animateBars(){
+  setTimeout(function(){
+    document.querySelectorAll('.page-section.active .hbar-fill, .page-section.active .progress-fill, .page-section.active .pc-progress-fill, .page-section.active .tc-cap-fill').forEach(function(bar){
+      var w = bar.getAttribute('data-width');
+      if(w) bar.style.width = w;
+    });
+  },100);
+}
+
+// ── Notifications
+function showNotif(type){
+  var container = document.getElementById('notifContainer');
+  var n = document.createElement('div');
+  n.className = 'notif';
+  if(type==='saved'){
+    n.innerHTML='<span class="notif-icon">✅</span><div class="notif-text"><div class="notif-title">Guardado</div><div class="notif-msg">Los cambios se han guardado correctamente.</div></div>';
+  }
+  container.appendChild(n);
+  setTimeout(function(){n.style.opacity='0';n.style.transition='opacity .3s';setTimeout(function(){n.remove()},300)},3500);
+}
+
+// ── Init
+document.addEventListener('DOMContentLoaded',function(){
+  animateCounters();
+  animateBars();
+});
+</script>
 </body>
 </html>`
   },
-}
-
-interface ProjectMgmtMockData {
-  heroTagline?: string
-  heroSubtitle?: string
-  activeProjects?: number
-  totalTasks?: number
-  completedPct?: number
-  teamSize?: number
-  tasksCompleted?: number
-  tasksInProgress?: number
-  tasksInReview?: number
-  velocity?: number
-  projectProgress?: BarChartItem[]
-  alert1?: string
-  alert2?: string
-  alert3?: string
-  alert4?: string
-  alertCount?: number
-  projects?: Record<string, unknown>[]
-  totalProjects?: number
-  onTrack?: number
-  atRisk?: number
-  planning?: number
-  kanban?: {
-    todo: Record<string, unknown>[]
-    inProgress: Record<string, unknown>[]
-    review: Record<string, unknown>[]
-    done: Record<string, unknown>[]
-  }
-  team?: Record<string, unknown>[]
-  avgCapacity?: number
-  overloaded?: number
-  productivity?: number
-  timeline?: Record<string, unknown>[]
-  velocityByWeek?: BarChartItem[]
-  totalDelivered?: string
-  totalDeliveredLabel?: string
-  onTimePct?: number
-  reviewTimePct?: number
-  sprintGoalPct?: number
-  bugFixRate?: number
-  docCoverage?: number
-  pmEmail?: string
-  sprintDuration?: string
-  methodology?: string
 }
