@@ -755,7 +755,7 @@ describe('PrototypeViewer — Single Page Mode', () => {
 
     const iframe = container.querySelector('iframe')
     expect(iframe).toBeTruthy()
-    expect(iframe?.className).toContain('h-[850px]')
+    expect(iframe?.className).toContain('h-[90vh]')
   })
 
   it('uses standard height for multi-page', async () => {

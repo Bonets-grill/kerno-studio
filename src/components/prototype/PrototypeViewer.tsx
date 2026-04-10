@@ -77,10 +77,10 @@ export default function PrototypeViewer({ pages, projectName, onApprove, onReque
         <div className={`${widthClass[viewMode]} max-w-full transition-all duration-300`}>
           <iframe
             srcDoc={pages[currentPage].html}
-            className={`w-full rounded-lg border border-border ${pages.length === 1 ? 'h-[850px]' : 'h-[600px]'}`}
+            className={`w-full rounded-lg border border-border ${pages.length === 1 ? 'h-[90vh]' : 'h-[600px]'}`}
             style={{ background: '#08090d' }}
             title={`Preview: ${pages[currentPage].name}`}
-            sandbox="allow-scripts"
+            sandbox="allow-scripts allow-same-origin"
           />
         </div>
       </div>

@@ -200,7 +200,7 @@ describe('E2E: Software project → template selection → premium HTML', () => 
     expect(iframe?.getAttribute('srcDoc')).toContain('TestBiz')
 
     // Taller iframe for single-page premium demo
-    expect(iframe?.className).toContain('h-[850px]')
+    expect(iframe?.className).toContain('h-[90vh]')
 
     // Dark background
     expect(iframe?.style.background).toBe('rgb(8, 9, 13)')
