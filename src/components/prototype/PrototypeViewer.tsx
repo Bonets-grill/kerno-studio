@@ -13,6 +13,24 @@ interface PrototypeViewerProps {
 export default function PrototypeViewer({ pages, projectName, onApprove, onRequestChanges }: PrototypeViewerProps) {
   const [currentPage, setCurrentPage] = useState(0)
   const [viewMode, setViewMode] = useState<'desktop' | 'tablet' | 'mobile'>('desktop')
+  const [shareUrl, setShareUrl] = useState<string | null>(null)
+  const [sharing, setSharing] = useState(false)
+
+  const handleShare = async () => {
+    setSharing(true)
+    try {
+      const res = await fetch('/api/demos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ html: pages[currentPage].html, name: projectName }),
+      })
+      const { url } = await res.json()
+      await navigator.clipboard.writeText(url)
+      setShareUrl(url)
+      setTimeout(() => setShareUrl(null), 3000)
+    } catch { /* skip */ }
+    setSharing(false)
+  }
 
   const widthClass = {
     desktop: 'w-full',
@@ -91,6 +109,13 @@ export default function PrototypeViewer({ pages, projectName, onApprove, onReque
           Página {currentPage + 1} de {pages.length}
         </span>
         <div className="flex gap-3">
+          <button
+            onClick={handleShare}
+            disabled={sharing}
+            className="px-6 py-2.5 rounded-xl border border-neon-green/30 hover:border-neon-green/60 text-neon-green text-sm transition-all disabled:opacity-50"
+          >
+            {shareUrl ? '✓ Link copiado' : sharing ? 'Compartiendo...' : '🔗 Compartir'}
+          </button>
           {onRequestChanges && (
             <button
               onClick={onRequestChanges}

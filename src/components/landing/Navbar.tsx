@@ -14,6 +14,7 @@ export default function Navbar() {
     { label: t.nav_process, href: '#proceso' },
     { label: t.nav_cases, href: '#casos' },
     { label: t.nav_pricing, href: '#pricing' },
+    { label: 'Templates', href: '#templates' },
   ]
 
   useEffect(() => {

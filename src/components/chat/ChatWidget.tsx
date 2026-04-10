@@ -4,10 +4,12 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { useI18n } from '@/lib/i18n/context'
 import type { ProjectSummary, PrototypePage } from '@/types/database'
 import type { PresentationBrief } from '@/types/presentations'
+import { trackEvent } from '@/lib/analytics'
 import VoiceButton from './VoiceButton'
 import SummaryCard from './SummaryCard'
 import BuildingPreview, { ADDON_POOL } from './BuildingPreview'
 import PrototypeViewer from '@/components/prototype/PrototypeViewer'
+import OnboardingWizard from './OnboardingWizard'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -31,6 +33,8 @@ export default function ChatWidget() {
   const [prototypePages, setPrototypePages] = useState<PrototypePage[]>([])
   const [selectedAddons, setSelectedAddons] = useState<string[]>([])
   const [prototypeError, setPrototypeError] = useState<string | null>(null)
+  const [editInput, setEditInput] = useState('')
+  const [editing, setEditing] = useState(false)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -58,6 +62,20 @@ export default function ChatWidget() {
     }
     window.addEventListener('kerno:agent-summary', handleAgentSummary)
     return () => window.removeEventListener('kerno:agent-summary', handleAgentSummary)
+  }, [])
+
+  // Listen for template gallery selection
+  useEffect(() => {
+    const handleTemplateSelect = (e: Event) => {
+      const { templateName } = (e as CustomEvent).detail || {}
+      if (templateName) {
+        trackEvent('template_selected', { template: templateName })
+        setInput(`Quiero un sistema tipo ${templateName} para mi negocio`)
+        inputRef.current?.focus()
+      }
+    }
+    window.addEventListener('kerno:select-template', handleTemplateSelect)
+    return () => window.removeEventListener('kerno:select-template', handleTemplateSelect)
   }, [])
 
   const extractSummary = (text: string): ProjectSummary | null => {
@@ -168,6 +186,7 @@ export default function ChatWidget() {
 
   const sendMessage = async (content: string) => {
     if (!content.trim() || loading) return
+    if (messages.length === 0) trackEvent('chat_start')
 
     const userMessage: Message = { role: 'user', content: content.trim() }
     const updatedMessages = [...messages, userMessage]
@@ -218,9 +237,11 @@ export default function ChatWidget() {
       if (extractedSummary) {
         setSummary(extractedSummary)
         setServiceMode('prototype')
+        trackEvent('summary_generated', { name: extractedSummary.name, type: extractedSummary.type })
       } else if (extractedBrief) {
         setBrief(extractedBrief)
         setServiceMode('presentation')
+        trackEvent('brief_generated', { title: extractedBrief.title, type: extractedBrief.type })
       }
 
       setMessages((prev) => [
@@ -243,6 +264,7 @@ export default function ChatWidget() {
 
   const handleGeneratePrototype = async () => {
     if (!summary && !brief) return
+    trackEvent('prototype_generated', { mode: serviceMode })
     setPhase('building')
     setBuildProgress(0)
     setPrototypeError(null)
@@ -425,6 +447,60 @@ export default function ChatWidget() {
               </div>
             </div>
           )}
+
+          {/* Edit by chat */}
+          <div className="mt-6 rounded-2xl bg-surface-2 border border-border overflow-hidden">
+            <form onSubmit={async (e) => {
+              e.preventDefault()
+              if (!editInput.trim() || editing) return
+              setEditing(true)
+              try {
+                const res = await fetch('/api/prototype/edit', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ html: prototypePages[0]?.html, instruction: editInput }),
+                })
+                if (!res.ok) throw new Error('Edit failed')
+                const reader = res.body?.getReader()
+                if (!reader) throw new Error('No reader')
+                const decoder = new TextDecoder()
+                let newHtml = ''
+                while (true) {
+                  const { done, value } = await reader.read()
+                  if (done) break
+                  const chunk = decoder.decode(value, { stream: true })
+                  for (const line of chunk.split('\n')) {
+                    if (line.startsWith('data: ')) {
+                      const data = line.slice(6)
+                      if (data === '[DONE]') continue
+                      try { const p = JSON.parse(data); if (p.text) newHtml += p.text } catch {}
+                    }
+                  }
+                }
+                if (newHtml.includes('<!DOCTYPE')) {
+                  setPrototypePages([{ name: prototypePages[0]?.name || 'Demo', slug: 'demo', html: newHtml, order: 0 }])
+                }
+                setEditInput('')
+              } catch { /* skip */ }
+              setEditing(false)
+            }} className="p-4 flex gap-3">
+              <input
+                type="text"
+                value={editInput}
+                onChange={e => setEditInput(e.target.value)}
+                placeholder="Escribe un cambio... (ej: cambia los colores a azul, quita la sección de analytics)"
+                disabled={editing}
+                className="flex-1 px-4 py-3 rounded-xl bg-surface-3 border border-border text-foreground placeholder:text-muted/50 focus:outline-none focus:border-neon-cyan/50 text-sm disabled:opacity-50"
+              />
+              <button
+                type="submit"
+                disabled={!editInput.trim() || editing}
+                className="px-5 py-3 rounded-xl bg-gradient-to-r from-neon-cyan to-neon-green text-black font-semibold text-sm hover:opacity-90 disabled:opacity-50"
+              >
+                {editing ? '...' : 'Editar'}
+              </button>
+            </form>
+          </div>
         </div>
       </section>
     )
@@ -526,10 +602,7 @@ export default function ChatWidget() {
           {/* Messages */}
           <div ref={messagesContainerRef} className="p-6 min-h-[350px] max-h-[500px] overflow-y-auto space-y-4">
             {messages.length === 0 && !loading && (
-              <div className="text-center text-muted py-12">
-                <p className="text-lg mb-2">{t.chat_empty_greeting}</p>
-                <p className="text-sm">{t.chat_empty_instruction}</p>
-              </div>
+              <OnboardingWizard onComplete={(prompt) => sendMessage(prompt)} />
             )}
 
             {messages.map((msg, i) => (

@@ -59,10 +59,10 @@ describe('ChatWidget Component', () => {
     expect(screen.getByText('Kerno Studio AI')).toBeInTheDocument()
   })
 
-  it('renders empty state', async () => {
+  it('renders onboarding wizard in empty state', async () => {
     const ChatWidget = (await import('@/components/chat/ChatWidget')).default
     render(<ChatWidget />, { wrapper: TestWrapper })
-    expect(screen.getByText(/soy el asistente/)).toBeInTheDocument()
+    expect(screen.getByText(/tipo de negocio/)).toBeInTheDocument()
   })
 
   it('renders input and send button', async () => {
