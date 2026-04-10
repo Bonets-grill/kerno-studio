@@ -231,11 +231,10 @@ body{font-family:'Work Sans',sans-serif;background:var(--content-bg);color:var(-
   .grid-2{grid-template-columns:1fr}
 }
 @media(max-width:768px){
-  .sidebar{transform:translateX(-100%)}
-  .sidebar.open{transform:translateX(0)}
+  .sidebar{display:none}
   .navbar{left:0}
-  .main{margin-left:0}
-  .menu-toggle{display:block}
+  .main{margin-left:0;width:100%;padding:16px;padding-bottom:70px}
+  .bottom-nav{display:flex}
   .kpi-grid{grid-template-columns:1fr 1fr}
   .project-grid{grid-template-columns:1fr}
   .team-grid{grid-template-columns:1fr 1fr}
@@ -245,8 +244,20 @@ body{font-family:'Work Sans',sans-serif;background:var(--content-bg);color:var(-
 @media(max-width:480px){
   .kpi-grid{grid-template-columns:1fr}
   .team-grid{grid-template-columns:1fr}
-  .main{padding:16px}
 }
+.bottom-nav{
+  display:none;position:fixed;bottom:0;left:0;right:0;height:60px;
+  background:var(--sidebar-bg);border-top:1px solid var(--card-border);
+  justify-content:space-around;align-items:center;z-index:999;padding:0 8px;
+}
+.bottom-nav button{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  background:none;border:none;color:var(--text-muted);cursor:pointer;
+  font-size:0.58rem;font-family:inherit;padding:6px 8px;border-radius:8px;
+  transition:all .2s;min-width:44px;
+}
+.bottom-nav button .bnav-icon{font-size:1.1rem;line-height:1}
+.bottom-nav button.active{color:var(--primary)}
 </style>
 </head>
 <body>
@@ -785,15 +796,28 @@ body{font-family:'Work Sans',sans-serif;background:var(--content-bg);color:var(-
   <div class="footer">Powered by <strong style="color:var(--primary)">Kerno Studio</strong></div>
 </main>
 
+<!-- Bottom Nav (mobile only) -->
+<nav class="bottom-nav">
+  <button class="active" onclick="showSection('dashboard')"><span class="bnav-icon">◉</span>Inicio</button>
+  <button onclick="showSection('projects')"><span class="bnav-icon">◎</span>Proyectos</button>
+  <button onclick="showSection('tasks')"><span class="bnav-icon">☰</span>Tareas</button>
+  <button onclick="showSection('team')"><span class="bnav-icon">▤</span>Equipo</button>
+  <button onclick="showSection('timeline')"><span class="bnav-icon">⊞</span>Timeline</button>
+  <button onclick="showSection('analytics')"><span class="bnav-icon">◈</span>Analytics</button>
+</nav>
+
 <script>
 // ── Section Navigation
 function showSection(id) {
   document.querySelectorAll('.page-section').forEach(function(s){s.classList.remove('active')});
+  document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.remove('active'));
   var sec = document.getElementById('sec-'+id);
   if(sec) sec.classList.add('active');
   document.querySelectorAll('.sidebar-link').forEach(function(l){l.classList.remove('active')});
   var link = document.querySelector('.sidebar-link[data-section="'+id+'"]');
   if(link) link.classList.add('active');
+  var bnav=document.querySelector('.bottom-nav button[onclick*="'+id+'"]');
+  if(bnav) bnav.classList.add('active');
   var titles = {dashboard:'Dashboard',projects:'Proyectos',tasks:'Tareas',team:'Equipo',timeline:'Timeline',analytics:'Analytics',settings:'Configuración'};
   var navT = document.getElementById('navTitle');
   if(navT) navT.textContent = titles[id]||id;

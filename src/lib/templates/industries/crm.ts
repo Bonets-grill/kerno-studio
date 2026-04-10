@@ -227,23 +227,32 @@ tr:nth-child(even):hover td{background:rgba(255,255,255,0.03)}
 .mobile-toggle{display:none;position:fixed;top:16px;left:16px;z-index:200;background:var(--primary);border:0;color:#fff;width:36px;height:36px;border-radius:8px;font-size:18px;cursor:pointer;align-items:center;justify-content:center}
 .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99}
 @media(max-width:768px){
-  .mobile-toggle{display:flex}
-  .sidebar{transform:translateX(-100%)}
-  .sidebar.open{transform:translateX(0)}
-  .sidebar-overlay.open{display:block}
-  .topbar{left:0;padding-left:60px}
-  .main-content{margin-left:0}
+  .sidebar{display:none}
+  .topbar{left:0}
+  .main-content{margin-left:0;width:100%;padding:16px;padding-bottom:70px}
+  .bottom-nav{display:flex}
   .stat-grid{grid-template-columns:repeat(2,1fr)}
   .grid-2,.grid-3{grid-template-columns:1fr}
   .pipeline-board{flex-direction:column}
   .pipeline-col{min-width:100%}
-  .search-box{width:120px}
-  .search-box:focus{width:160px}
 }
 @media(max-width:480px){
   .stat-grid{grid-template-columns:1fr}
   .topbar-right .search-box{display:none}
 }
+.bottom-nav{
+  display:none;position:fixed;bottom:0;left:0;right:0;height:60px;
+  background:var(--sidebar-bg);border-top:1px solid var(--card-border);
+  justify-content:space-around;align-items:center;z-index:999;padding:0 8px;
+}
+.bottom-nav button{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  background:none;border:none;color:var(--text-muted);cursor:pointer;
+  font-size:0.58rem;font-family:inherit;padding:6px 8px;border-radius:8px;
+  transition:all .2s;min-width:44px;
+}
+.bottom-nav button .bnav-icon{font-size:1.1rem;line-height:1}
+.bottom-nav button.active{color:var(--primary)}
 </style>
 </head>
 <body>
@@ -889,14 +898,27 @@ tr:nth-child(even):hover td{background:rgba(255,255,255,0.03)}
   <div class="footer">&copy; 2026 ${name} &mdash; Powered by <strong>Kerno Studio</strong></div>
 </main>
 
+<!-- Bottom Nav (mobile only) -->
+<nav class="bottom-nav">
+  <button class="active" onclick="showSection('dashboard')"><span class="bnav-icon">◉</span>Inicio</button>
+  <button onclick="showSection('contacts')"><span class="bnav-icon">◎</span>Contactos</button>
+  <button onclick="showSection('pipeline')"><span class="bnav-icon">☰</span>Pipeline</button>
+  <button onclick="showSection('deals')"><span class="bnav-icon">▤</span>Deals</button>
+  <button onclick="showSection('activities')"><span class="bnav-icon">⊞</span>Actividades</button>
+  <button onclick="showSection('reports')"><span class="bnav-icon">◈</span>Reportes</button>
+</nav>
+
 <script>
 function showSection(id){
   document.querySelectorAll('.main-section').forEach(function(s){s.style.display='none';s.classList.remove('active')});
   document.querySelectorAll('.sidebar-link').forEach(function(l){l.classList.remove('active')});
+  document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.remove('active'));
   var sec=document.getElementById('section-'+id);
   if(sec){sec.style.display='block';sec.classList.add('active')}
   var link=document.querySelector('[data-section="'+id+'"]');
   if(link) link.classList.add('active');
+  var bnav=document.querySelector('.bottom-nav button[onclick*="'+id+'"]');
+  if(bnav) bnav.classList.add('active');
   var title=document.getElementById('section-title');
   if(title){
     var titles={'dashboard':'Dashboard','contacts':'Contactos','pipeline':'Pipeline','deals':'Deals','activities':'Actividades','reports':'Reportes','settings':'Ajustes'};

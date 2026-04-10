@@ -221,13 +221,36 @@ body { font-family: 'Lexend', sans-serif; background: var(--content-bg); color: 
 
 @media (max-width: 1200px) { .course-grid, .cert-grid, .grid-3 { grid-template-columns: repeat(2, 1fr); } .kpi-grid { grid-template-columns: repeat(2, 1fr); } .mini-course-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 768px) {
-  .sidebar { transform: translateX(-250px); }
-  .main { margin-left: 0; }
+  .sidebar { display: none; }
+  .main { margin-left: 0; width: 100%; padding: 16px; padding-bottom: 70px; }
   .topbar { left: 0; }
+  .bottom-nav { display: flex; }
   .course-grid, .cert-grid, .grid-2, .grid-3 { grid-template-columns: 1fr; }
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
   .mini-course-grid { grid-template-columns: 1fr; }
   .settings-grid { grid-template-columns: 1fr; }
+}
+.bottom-nav{
+  display:none;position:fixed;bottom:0;left:0;right:0;height:60px;
+  background:var(--sidebar-bg);border-top:1px solid var(--border);
+  justify-content:space-around;align-items:center;z-index:999;padding:0 8px;
+}
+.bottom-nav button{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  background:none;border:none;color:var(--text-muted);cursor:pointer;
+  font-size:0.58rem;font-family:inherit;padding:6px 8px;border-radius:8px;
+  transition:all .2s;min-width:44px;
+}
+.bottom-nav button .bnav-icon{font-size:1.1rem;line-height:1}
+.bottom-nav button.active{color:var(--primary)}
+
+@media(max-width:700px){
+  .sidebar{display:none}
+  .topbar{left:0}
+  .main{margin-left:0;width:100%;padding:16px;padding-bottom:70px}
+  .bottom-nav{display:flex}
+  .kpi-grid{grid-template-columns:1fr}
+  .grid-2,.grid-3{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -531,12 +554,24 @@ body { font-family: 'Lexend', sans-serif; background: var(--content-bg); color: 
 
 <div class="footer">Prototipo generado por <strong style="color:${primary}">Kerno Studio</strong></div>
 
+<!-- Bottom Nav (mobile only) -->
+<nav class="bottom-nav">
+  <button class="active" onclick="showSection('dashboard')"><span class="bnav-icon">◉</span>Inicio</button>
+  <button onclick="showSection('courses')"><span class="bnav-icon">◎</span>Cursos</button>
+  <button onclick="showSection('students')"><span class="bnav-icon">☰</span>Alumnos</button>
+  <button onclick="showSection('lessons')"><span class="bnav-icon">▤</span>Lecciones</button>
+  <button onclick="showSection('certificates')"><span class="bnav-icon">⊞</span>Certificados</button>
+  <button onclick="showSection('analytics')"><span class="bnav-icon">◈</span>Analytics</button>
+</nav>
+
 <script>
 function showSection(id) {
   document.querySelectorAll('.page-section').forEach(function(s) { s.classList.remove('active'); });
   document.getElementById('sec-' + id).classList.add('active');
   document.querySelectorAll('.sidebar-link').forEach(function(l) { l.classList.remove('active'); });
-  event.currentTarget.classList.add('active');
+  document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.remove('active'));
+  var bnav = document.querySelector('.bottom-nav button[onclick*="' + id + '"]');
+  if(bnav) bnav.classList.add('active');
   document.querySelector('.topbar-title').textContent =
     id === 'dashboard' ? 'Dashboard' :
     id === 'courses' ? 'Cursos' :

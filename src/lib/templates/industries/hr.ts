@@ -192,21 +192,32 @@ body{font-family:'Manrope',sans-serif;background:var(--content-bg);color:var(--t
   .pipeline-stage{flex:1 1 45%}
 }
 @media(max-width:768px){
-  .sidebar{transform:translateX(-100%)}
-  .sidebar.open{transform:translateX(0)}
+  .sidebar{display:none}
   .navbar{left:0}
-  .main{margin-left:0}
-  .menu-toggle{display:block}
+  .main{margin-left:0;width:100%;padding:16px;padding-bottom:70px}
+  .bottom-nav{display:flex}
   .kpi-grid{grid-template-columns:1fr 1fr}
   .setting-input{width:160px}
   .pipeline-stage{flex:1 1 100%}
 }
 @media(max-width:480px){
   .kpi-grid{grid-template-columns:1fr}
-  .main{padding:16px}
   .data-tbl{font-size:0.7rem}
   .data-tbl thead th,.data-tbl tbody td{padding:8px 10px}
 }
+.bottom-nav{
+  display:none;position:fixed;bottom:0;left:0;right:0;height:60px;
+  background:var(--sidebar-bg);border-top:1px solid var(--card-border);
+  justify-content:space-around;align-items:center;z-index:999;padding:0 8px;
+}
+.bottom-nav button{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  background:none;border:none;color:var(--text-muted);cursor:pointer;
+  font-size:0.58rem;font-family:inherit;padding:6px 8px;border-radius:8px;
+  transition:all .2s;min-width:44px;
+}
+.bottom-nav button .bnav-icon{font-size:1.1rem;line-height:1}
+.bottom-nav button.active{color:var(--primary)}
 </style>
 </head>
 <body>
@@ -607,15 +618,28 @@ body{font-family:'Manrope',sans-serif;background:var(--content-bg);color:var(--t
   <div class="footer">Powered by <strong style="color:var(--primary)">Kerno Studio</strong></div>
 </main>
 
+<!-- Bottom Nav (mobile only) -->
+<nav class="bottom-nav">
+  <button class="active" onclick="showSection('dashboard')"><span class="bnav-icon">◉</span>Inicio</button>
+  <button onclick="showSection('directory')"><span class="bnav-icon">◎</span>Directorio</button>
+  <button onclick="showSection('recruitment')"><span class="bnav-icon">☰</span>Reclutamiento</button>
+  <button onclick="showSection('payroll')"><span class="bnav-icon">▤</span>N\u00f3minas</button>
+  <button onclick="showSection('timeoff')"><span class="bnav-icon">⊞</span>Vacaciones</button>
+  <button onclick="showSection('analytics')"><span class="bnav-icon">◈</span>Analytics</button>
+</nav>
+
 <script>
 // ── Section Navigation
 function showSection(id) {
   document.querySelectorAll('.page-section').forEach(function(s){s.classList.remove('active')});
+  document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.remove('active'));
   var sec = document.getElementById('sec-'+id);
   if(sec) sec.classList.add('active');
   document.querySelectorAll('.sidebar-link').forEach(function(l){l.classList.remove('active')});
   var link = document.querySelector('.sidebar-link[data-section="'+id+'"]');
   if(link) link.classList.add('active');
+  var bnav=document.querySelector('.bottom-nav button[onclick*="'+id+'"]');
+  if(bnav) bnav.classList.add('active');
   var titles = {dashboard:'Dashboard',directory:'Directorio',recruitment:'Reclutamiento',payroll:'Nóminas',timeoff:'Vacaciones',analytics:'Analytics',settings:'Configuración'};
   var navT = document.getElementById('navTitle');
   if(navT) navT.textContent = titles[id]||id;

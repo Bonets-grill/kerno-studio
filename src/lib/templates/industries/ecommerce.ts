@@ -424,13 +424,34 @@ tr:last-child td { border-bottom: none; }
 .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text); }
 
 @media (max-width: 900px) {
-  .sidebar { width: 60px; }
-  .sidebar-brand-name, .sidebar-link span, .sidebar-footer { display: none; }
-  .sidebar-brand { padding: 16px 11px; justify-content: center; }
-  .sidebar-link { justify-content: center; padding: 11px 0; }
-  .main { margin-left: 60px; }
+  .sidebar { display: none; }
+  .topbar { left: 0; }
+  .main { margin-left: 0; width: 100%; padding: 16px; padding-bottom: 70px; }
+  .bottom-nav { display: flex; }
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
   .grid-2, .product-grid, .grid-3 { grid-template-columns: 1fr; }
+}
+.bottom-nav{
+  display:none;position:fixed;bottom:0;left:0;right:0;height:60px;
+  background:var(--sidebar-bg);border-top:1px solid var(--border);
+  justify-content:space-around;align-items:center;z-index:999;padding:0 8px;
+}
+.bottom-nav button{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  background:none;border:none;color:var(--text-muted);cursor:pointer;
+  font-size:0.58rem;font-family:inherit;padding:6px 8px;border-radius:8px;
+  transition:all .2s;min-width:44px;
+}
+.bottom-nav button .bnav-icon{font-size:1.1rem;line-height:1}
+.bottom-nav button.active{color:var(--primary)}
+
+@media(max-width:700px){
+  .sidebar{display:none}
+  .topbar{left:0}
+  .main{margin-left:0;width:100%;padding:16px;padding-bottom:70px}
+  .bottom-nav{display:flex}
+  .kpi-grid{grid-template-columns:1fr}
+  .grid-2,.grid-3{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -824,19 +845,33 @@ tr:last-child td { border-bottom: none; }
   <div class="footer">\u00A9 2026 ${name} — Powered by Kerno Studio</div>
 </div>
 
+<!-- Bottom Nav (mobile only) -->
+<nav class="bottom-nav">
+  <button class="active" onclick="showSection('dashboard')"><span class="bnav-icon">◉</span>Inicio</button>
+  <button onclick="showSection('products')"><span class="bnav-icon">◎</span>Productos</button>
+  <button onclick="showSection('orders')"><span class="bnav-icon">☰</span>Pedidos</button>
+  <button onclick="showSection('inventory')"><span class="bnav-icon">▤</span>Inventario</button>
+  <button onclick="showSection('customers')"><span class="bnav-icon">⊞</span>Clientes</button>
+  <button onclick="showSection('analytics')"><span class="bnav-icon">◈</span>Analytics</button>
+</nav>
+
 <script>
 function showSection(id) {
+window.scrollTo(0,0);
   document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); });
   var sec = document.getElementById('sec-' + id);
   if (sec) sec.classList.add('active');
 
   document.querySelectorAll('.sidebar-link').forEach(function(l) { l.classList.remove('active'); });
+  document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.remove('active'));
   var links = document.querySelectorAll('.sidebar-link');
   links.forEach(function(l) {
     if (l.getAttribute('onclick') && l.getAttribute('onclick').indexOf(id) !== -1) {
       l.classList.add('active');
     }
   });
+  var bnav = document.querySelector('.bottom-nav button[onclick*="'+id+'"]');
+  if(bnav) bnav.classList.add('active');
 
   var titles = {
     dashboard: 'Dashboard',

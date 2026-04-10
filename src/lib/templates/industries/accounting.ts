@@ -159,22 +159,33 @@ select.form-input{cursor:pointer;appearance:none;background-image:url("data:imag
 /* ── Responsive ── */
 @media(max-width:1200px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:900px){
-  .sidebar{transform:translateX(-100%);transition:transform .3s}
-  .sidebar.open{transform:translateX(0)}
+  .sidebar{display:none}
   .topbar{left:0}
-  .main{margin-left:0}
+  .main{margin-left:0;width:100%;padding:16px;padding-bottom:70px}
   .footer{margin-left:0}
+  .bottom-nav{display:flex}
   .grid-2{grid-template-columns:1fr}
   .grid-3{grid-template-columns:1fr}
   .kpi-grid{grid-template-columns:repeat(2,1fr)}
-  .menu-toggle{display:flex!important}
 }
 @media(max-width:600px){
   .kpi-grid{grid-template-columns:1fr}
-  .main{padding:14px}
   .kpi-value{font-size:20px}
 }
 .menu-toggle{display:none;width:32px;height:32px;border-radius:7px;background:var(--card-bg);border:1px solid var(--card-border);align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--text)}
+.bottom-nav{
+  display:none;position:fixed;bottom:0;left:0;right:0;height:60px;
+  background:var(--sidebar-bg);border-top:1px solid var(--card-border);
+  justify-content:space-around;align-items:center;z-index:999;padding:0 8px;
+}
+.bottom-nav button{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  background:none;border:none;color:var(--text-muted);cursor:pointer;
+  font-size:0.58rem;font-family:inherit;padding:6px 8px;border-radius:8px;
+  transition:all .2s;min-width:44px;
+}
+.bottom-nav button .bnav-icon{font-size:1.1rem;line-height:1}
+.bottom-nav button.active{color:var(--primary)}
 </style>
 </head>
 <body>
@@ -535,12 +546,23 @@ select.form-input{cursor:pointer;appearance:none;background-image:url("data:imag
 
 <div class="footer">&copy; 2026 ${bn} — Powered by <strong style="color:var(--accent)">Kerno Studio</strong></div>
 
+<!-- Bottom Nav (mobile only) -->
+<nav class="bottom-nav">
+  <button class="active" onclick="showSection('dashboard')"><span class="bnav-icon">◉</span>Inicio</button>
+  <button onclick="showSection('invoices')"><span class="bnav-icon">◎</span>Facturas</button>
+  <button onclick="showSection('expenses')"><span class="bnav-icon">☰</span>Gastos</button>
+  <button onclick="showSection('taxes')"><span class="bnav-icon">▤</span>Impuestos</button>
+  <button onclick="showSection('bank')"><span class="bnav-icon">⊞</span>Banco</button>
+  <button onclick="showSection('analytics')"><span class="bnav-icon">◈</span>Analytics</button>
+</nav>
+
 <script>
 (function(){
   var sections=['dashboard','invoices','expenses','taxes','bank','analytics','settings'];
   var titles={dashboard:'Dashboard',invoices:'Facturas',expenses:'Gastos',taxes:'Impuestos',bank:'Banco',analytics:'Analytics',settings:'Configuración'};
 
   window.showSection=function(id){
+    document.querySelectorAll('.bottom-nav button').forEach(function(b){b.classList.remove('active')});
     sections.forEach(function(s){
       var el=document.getElementById('sec-'+s);
       var link=document.querySelector('[data-section="'+s+'"]');
@@ -551,6 +573,8 @@ select.form-input{cursor:pointer;appearance:none;background-image:url("data:imag
     var activeLink=document.querySelector('[data-section="'+id+'"]');
     if(target)target.classList.add('active');
     if(activeLink)activeLink.classList.add('active');
+    var bnav=document.querySelector('.bottom-nav button[onclick*="'+id+'"]');
+    if(bnav)bnav.classList.add('active');
     var tt=document.getElementById('topbar-title');
     if(tt)tt.textContent=titles[id]||id;
     window.scrollTo(0,0);

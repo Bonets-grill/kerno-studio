@@ -160,12 +160,27 @@ tr:hover td{background:rgba(255,255,255,0.02)}
   .grid-2,.grid-3{grid-template-columns:1fr}
 }
 @media(max-width:700px){
-  .sidebar{width:60px}
-  .sidebar-brand h1,.sidebar-link span,.sidebar-footer{display:none}
-  .sidebar-link{justify-content:center;padding:12px 0}
-  .topbar{left:60px}
-  .main{margin-left:60px;width:calc(100% - 60px);padding:16px}
+  .sidebar{display:none}
+  .topbar{left:0}
+  .main{margin-left:0;width:100%;padding:16px;padding-bottom:70px}
+  .bottom-nav{display:flex}
 }
+/* Bottom tab bar - native app feel */
+.bottom-nav{
+  display:none;position:fixed;bottom:0;left:0;right:0;height:60px;
+  background:var(--sidebar-bg);border-top:1px solid var(--border);
+  justify-content:space-around;align-items:center;z-index:999;
+  padding:0 8px;
+}
+.bottom-nav button{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  background:none;border:none;color:var(--text-muted);cursor:pointer;
+  font-size:0.58rem;font-family:inherit;padding:6px 8px;border-radius:8px;
+  transition:all .2s;min-width:48px;
+}
+.bottom-nav button .bnav-icon{font-size:1.1rem;line-height:1}
+.bottom-nav button.active{color:var(--primary)}
+.bottom-nav button:hover{color:var(--primary)}
 </style>
 </head>
 <body>
@@ -468,16 +483,28 @@ tr:hover td{background:rgba(255,255,255,0.02)}
 <div class="main-footer">&copy; 2026 ${name} &mdash; Powered by <strong style="color:var(--primary)">Kerno Studio</strong></div>
 </main>
 
+<!-- Bottom Nav (mobile only) -->
+<nav class="bottom-nav">
+  <button class="active" onclick="showPage('dashboard')"><span class="bnav-icon">◉</span>Inicio</button>
+  <button onclick="showPage('citas')"><span class="bnav-icon">◎</span>Citas</button>
+  <button onclick="showPage('pacientes')"><span class="bnav-icon">☰</span>Pacientes</button>
+  <button onclick="showPage('historial')"><span class="bnav-icon">▤</span>Historial</button>
+  <button onclick="showPage('analytics')"><span class="bnav-icon">◈</span>Analytics</button>
+  <button onclick="showPage('configuracion')"><span class="bnav-icon">⚙</span>Config</button>
+</nav>
+
 <script>
 function showPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.sidebar-link').forEach(l=>l.classList.remove('active'));
+  document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.remove('active'));
   var page=document.getElementById('page-'+id);
   if(page)page.classList.add('active');
   var link=document.querySelector('[data-page="'+id+'"]');
   if(link)link.classList.add('active');
   var titles={dashboard:'Dashboard',citas:'Citas',pacientes:'Pacientes',historial:'Historial Clínico',facturacion:'Facturación',analytics:'Analytics',configuracion:'Configuración'};
   document.getElementById('topbar-title').textContent=titles[id]||id;
+  window.scrollTo(0,0);
 }
 function showNotif(msg){
   var n=document.getElementById('notif');
