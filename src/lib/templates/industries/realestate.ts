@@ -251,6 +251,7 @@ h1, h2, h3, h4 { font-family: 'Cormorant Garamond', serif; font-weight: 600; let
 <body>
 
 <!-- ═══ SIDEBAR ═══ -->
+<div class="app-layout">
 <aside class="sidebar">
   <div class="sidebar-brand">${name}<span>Panel Inmobiliario</span></div>
   <nav class="sidebar-nav">
@@ -266,7 +267,8 @@ h1, h2, h3, h4 { font-family: 'Cormorant Garamond', serif; font-weight: 600; let
 </aside>
 
 <!-- ═══ TOPBAR ═══ -->
-<header class="topbar">
+<div class="main-area">
+>
   <div class="topbar-title">Dashboard</div>
   <div class="topbar-right">
     <input class="topbar-search" placeholder="Buscar propiedades, clientes..." />
@@ -503,7 +505,9 @@ h1, h2, h3, h4 { font-family: 'Cormorant Garamond', serif; font-weight: 600; let
 
 <div class="footer">Prototipo generado por <strong style="color:${primary}">Kerno Studio</strong></div>
 
-<!-- Bottom Nav (mobile only) -->
+</div><!-- /main-area -->
+</div><!-- /app-layout -->
+ Nav (mobile only) -->
 <nav class="bottom-nav">
   <button class="active" onclick="showSection('dashboard')"><span class="bnav-icon">◉</span>Inicio</button>
   <button onclick="showSection('properties')"><span class="bnav-icon">◎</span>Propiedades</button>

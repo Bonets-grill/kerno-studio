@@ -575,6 +575,7 @@ a { color: inherit; text-decoration: none; }
 <body>
 
 <!-- ═══════════ SIDEBAR ═══════════ -->
+<div class="app-layout">
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-logo">
     <div class="sidebar-logo-icon">${bn.charAt(0).toUpperCase()}</div>
@@ -607,7 +608,8 @@ a { color: inherit; text-decoration: none; }
 </aside>
 
 <!-- ═══════════ TOP NAVBAR ═══════════ -->
-<header class="topbar">
+<div class="main-area">
+>
   <div style="display:flex;align-items:center;gap:12px">
     <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
     <span class="topbar-title" id="topbar-title">Dashboard</span>
@@ -1250,7 +1252,9 @@ a { color: inherit; text-decoration: none; }
   © 2026 ${bn} — Powered by <strong style="color:var(--accent)">Kerno Studio</strong>
 </div>
 
-<!-- Bottom Nav (mobile only) -->
+</div><!-- /main-area -->
+</div><!-- /app-layout -->
+ Nav (mobile only) -->
 <nav class="bottom-nav">
   <button class="active" onclick="showSection('dashboard')"><span class="bnav-icon">◉</span>Inicio</button>
   <button onclick="showSection('orders')"><span class="bnav-icon">◎</span>Pedidos</button>

@@ -43,10 +43,10 @@ export const hrTemplate: TemplateDefinition = {
   --navbar-h:56px;
 }
 html{scroll-behavior:smooth}
-body{font-family:'Manrope',sans-serif;background:var(--content-bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+body{font-family:'Manrope',sans-serif;background:var(--content-bg);color:var(--text);height:100vh;overflow:hidden;}
 
 /* ── SIDEBAR ── */
-.sidebar{position:fixed;top:0;left:0;width:var(--sidebar-w);height:100vh;background:var(--sidebar-bg);border-right:1px solid var(--card-border);z-index:100;display:flex;flex-direction:column;transition:transform .3s}
+.sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);height:100vh;background:var(--sidebar-bg);border-right:1px solid var(--card-border);z-index:100;display:flex;flex-direction:column;transition:transform .3s}
 .sidebar-brand{padding:20px 24px;font-size:1.1rem;font-weight:800;color:var(--primary);border-bottom:1px solid var(--card-border);letter-spacing:-0.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sidebar-nav{flex:1;padding:12px 0;overflow-y:auto}
 .sidebar-link{display:flex;align-items:center;gap:12px;padding:11px 24px;color:var(--text-dim);font-size:0.85rem;font-weight:500;cursor:pointer;transition:all .2s;border-left:3px solid transparent;text-decoration:none}
@@ -64,7 +64,7 @@ body{font-family:'Manrope',sans-serif;background:var(--content-bg);color:var(--t
 .menu-toggle{display:none;background:none;border:none;color:var(--text);font-size:1.3rem;cursor:pointer}
 
 /* ── MAIN CONTENT ── */
-.main{margin-left:var(--sidebar-w);margin-top:var(--navbar-h);padding:28px;min-height:calc(100vh - var(--navbar-h))}
+.main{flex:1;overflow-y:auto;padding:28px;min-height:calc(100vh - var(--navbar-h))}
 .page-section{display:none;animation:fadeUp .4s ease}
 .page-section.active{display:block}
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
@@ -223,6 +223,7 @@ body{font-family:'Manrope',sans-serif;background:var(--content-bg);color:var(--t
 <body>
 
 <!-- SIDEBAR -->
+<div class="app-layout">
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-brand">${biz}</div>
   <nav class="sidebar-nav">
@@ -618,7 +619,9 @@ body{font-family:'Manrope',sans-serif;background:var(--content-bg);color:var(--t
   <div class="footer">Powered by <strong style="color:var(--primary)">Kerno Studio</strong></div>
 </main>
 
-<!-- Bottom Nav (mobile only) -->
+</div><!-- /main-area -->
+</div><!-- /app-layout -->
+ Nav (mobile only) -->
 <nav class="bottom-nav">
   <button class="active" onclick="showSection('dashboard')"><span class="bnav-icon">◉</span>Inicio</button>
   <button onclick="showSection('directory')"><span class="bnav-icon">◎</span>Directorio</button>

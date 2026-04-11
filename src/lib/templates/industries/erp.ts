@@ -44,10 +44,10 @@ export const erpTemplate: TemplateDefinition = {
   --topbar-h:56px;
 }
 html{scroll-behavior:smooth}
-body{font-family:'IBM Plex Sans',sans-serif;background:var(--content-bg);color:var(--text);overflow-x:hidden;min-height:100vh}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--content-bg);color:var(--text);overflow:hidden;height:100vh;}
 
 /* ── Sidebar ── */
-.sidebar{position:fixed;left:0;top:0;width:var(--sidebar-w);height:100vh;background:var(--sidebar-bg);border-right:1px solid var(--card-border);display:flex;flex-direction:column;z-index:100;overflow-y:auto}
+.sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);height:100vh;background:var(--sidebar-bg);border-right:1px solid var(--card-border);display:flex;flex-direction:column;z-index:100;overflow-y:auto}
 .sidebar-logo{padding:18px 20px;border-bottom:1px solid var(--card-border);display:flex;align-items:center;gap:10px}
 .sidebar-logo .logo-icon{width:34px;height:34px;border-radius:8px;background:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:#fff;flex-shrink:0}
 .sidebar-logo .logo-text{font-weight:700;font-size:14px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -59,7 +59,7 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--content-bg);color:v
 .sidebar-footer{padding:16px 20px;border-top:1px solid var(--card-border);font-size:11px;color:var(--text-dim)}
 
 /* ── Topbar ── */
-.topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);background:var(--topbar-bg);border-bottom:1px solid var(--card-border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;z-index:90}
+.topbar{height:var(--topbar-h);background:var(--topbar-bg);border-bottom:1px solid var(--card-border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;z-index:90}
 .topbar-title{font-size:15px;font-weight:600;color:var(--text)}
 .topbar-right{display:flex;align-items:center;gap:16px}
 .topbar-right .notif{width:34px;height:34px;border-radius:8px;background:var(--card-bg);border:1px solid var(--card-border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;position:relative}
@@ -67,7 +67,7 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--content-bg);color:v
 .topbar-avatar{width:34px;height:34px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;cursor:pointer}
 
 /* ── Main Content ── */
-.main{margin-left:var(--sidebar-w);margin-top:var(--topbar-h);padding:28px;min-height:calc(100vh - var(--topbar-h))}
+.main{flex:1;overflow-y:auto;padding:28px;min-height:calc(100vh - var(--topbar-h))}
 .page-section{display:none}
 .page-section.active{display:block}
 .section-header{margin-bottom:24px}
@@ -191,6 +191,7 @@ select.form-input{cursor:pointer;appearance:none;background-image:url("data:imag
 <body>
 
 <!-- Sidebar -->
+<div class="app-layout">
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-logo">
     <div class="logo-icon">${bn.charAt(0).toUpperCase()}</div>
@@ -208,7 +209,8 @@ select.form-input{cursor:pointer;appearance:none;background-image:url("data:imag
   <div class="sidebar-footer">Powered by <strong style="color:var(--accent)">Kerno Studio</strong></div>
 </aside>
 
-<!-- Topbar -->
+<div class="main-area">
+ -->
 <header class="topbar">
   <div style="display:flex;align-items:center;gap:12px">
     <div class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</div>
@@ -527,7 +529,9 @@ select.form-input{cursor:pointer;appearance:none;background-image:url("data:imag
 
 <div class="footer">&copy; 2026 ${bn} — Powered by <strong style="color:var(--accent)">Kerno Studio</strong></div>
 
-<!-- Bottom Nav (mobile only) -->
+</div><!-- /main-area -->
+</div><!-- /app-layout -->
+ Nav (mobile only) -->
 <nav class="bottom-nav">
   <button class="active" onclick="showSection('dashboard')"><span class="bnav-icon">◉</span>Inicio</button>
   <button onclick="showSection('invoicing')"><span class="bnav-icon">◎</span>Facturas</button>

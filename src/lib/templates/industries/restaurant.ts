@@ -443,6 +443,7 @@ tr:last-child td { border-bottom: none; }
 <body>
 
 <!-- Sidebar -->
+<div class="app-layout">
 <aside class="sidebar">
   <div class="sidebar-brand">
     <div class="sidebar-brand-icon">${name.charAt(0).toUpperCase()}</div>
@@ -462,7 +463,8 @@ tr:last-child td { border-bottom: none; }
 
 <!-- Main -->
 <div class="main">
-  <header class="topbar">
+  <div class="main-area">
+>
     <div class="topbar-title" id="topbar-title">Dashboard</div>
     <div class="topbar-right">
       <span class="topbar-badge">Premium</span>
@@ -869,7 +871,9 @@ tr:last-child td { border-bottom: none; }
   <div class="footer">\u00A9 2026 ${name} — Powered by Kerno Studio</div>
 </div>
 
-<!-- Bottom Nav (mobile only) -->
+</div><!-- /main-area -->
+</div><!-- /app-layout -->
+ Nav (mobile only) -->
 <nav class="bottom-nav">
   <button class="active" onclick="showSection('dashboard')"><span class="bnav-icon">◉</span>Inicio</button>
   <button onclick="showSection('reservations')"><span class="bnav-icon">◎</span>Reservas</button>

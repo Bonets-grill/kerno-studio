@@ -42,7 +42,7 @@ export const gymTemplate: TemplateDefinition = {
   --purple:#a855f7;
 }
 html{scroll-behavior:smooth}
-body{font-family:'Rajdhani',sans-serif;background:var(--content-bg);color:var(--text);display:flex;min-height:100vh;overflow-x:hidden;font-size:14px;line-height:1.5}
+body{font-family:'Rajdhani',sans-serif;background:var(--content-bg);color:var(--text);display:flex;height:100vh;overflow:hidden;font-size:14px;line-height:1.5}
 
 /* ── SIDEBAR ── */
 .sidebar{width:250px;background:var(--sidebar-bg);position:fixed;top:0;left:0;height:100vh;display:flex;flex-direction:column;border-right:1px solid var(--border);z-index:100}
@@ -57,7 +57,7 @@ body{font-family:'Rajdhani',sans-serif;background:var(--content-bg);color:var(--
 .sidebar-footer{padding:16px 20px;border-top:1px solid var(--border);font-size:0.6rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px}
 
 /* ── TOP NAVBAR ── */
-.topbar{position:fixed;top:0;left:250px;right:0;height:56px;background:var(--sidebar-bg);border-bottom:2px solid var(--primary);display:flex;align-items:center;justify-content:space-between;padding:0 28px;z-index:99}
+.topbar{height:56px;background:var(--sidebar-bg);border-bottom:2px solid var(--primary);display:flex;align-items:center;justify-content:space-between;padding:0 28px;z-index:99}
 .topbar-title{font-size:0.95rem;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:2px}
 .topbar-right{display:flex;align-items:center;gap:16px}
 .topbar-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.7rem;color:#fff}
@@ -66,7 +66,7 @@ body{font-family:'Rajdhani',sans-serif;background:var(--content-bg);color:var(--
 .topbar-search:focus{border-color:var(--primary)}
 
 /* ── MAIN ── */
-.main{margin-left:250px;margin-top:56px;padding:28px;min-height:calc(100vh - 56px);width:calc(100% - 250px)}
+.main{flex:1;padding:28px;overflow-y:auto}
 .page{display:none}
 .page.active{display:block}
 
@@ -194,6 +194,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
 <body>
 
 <!-- SIDEBAR -->
+<div class="app-layout">
 <aside class="sidebar">
   <div class="sidebar-brand">
     <h1>${name}</h1>
@@ -211,7 +212,8 @@ tr:hover td{background:rgba(255,255,255,0.02)}
   <div class="sidebar-footer">v3.0 · ${name}</div>
 </aside>
 
-<!-- TOPBAR -->
+<div class="main-area">
+ -->
 <header class="topbar">
   <div class="topbar-title" id="topbar-title">Dashboard</div>
   <div class="topbar-right">
@@ -528,7 +530,9 @@ tr:hover td{background:rgba(255,255,255,0.02)}
 <div class="main-footer">&copy; 2026 ${name} &mdash; Powered by <strong style="color:var(--primary)">Kerno Studio</strong></div>
 </main>
 
-<!-- Bottom Nav (mobile only) -->
+</div><!-- /main-area -->
+</div><!-- /app-layout -->
+ Nav (mobile only) -->
 <nav class="bottom-nav">
   <button class="active" onclick="showPage('dashboard')"><span class="bnav-icon">◉</span>Inicio</button>
   <button onclick="showPage('socios')"><span class="bnav-icon">◎</span>Socios</button>

@@ -257,6 +257,7 @@ body { font-family: 'Lexend', sans-serif; background: var(--content-bg); color: 
 <body>
 
 <!-- ═══ SIDEBAR ═══ -->
+<div class="app-layout">
 <aside class="sidebar">
   <div class="sidebar-brand">${name}<span>Plataforma Educativa</span></div>
   <nav class="sidebar-nav">
@@ -272,7 +273,8 @@ body { font-family: 'Lexend', sans-serif; background: var(--content-bg); color: 
 </aside>
 
 <!-- ═══ TOPBAR ═══ -->
-<header class="topbar">
+<div class="main-area">
+>
   <div class="topbar-title">Dashboard</div>
   <div class="topbar-right">
     <input class="topbar-search" placeholder="Buscar cursos, alumnos..." />
@@ -554,7 +556,9 @@ body { font-family: 'Lexend', sans-serif; background: var(--content-bg); color: 
 
 <div class="footer">Prototipo generado por <strong style="color:${primary}">Kerno Studio</strong></div>
 
-<!-- Bottom Nav (mobile only) -->
+</div><!-- /main-area -->
+</div><!-- /app-layout -->
+ Nav (mobile only) -->
 <nav class="bottom-nav">
   <button class="active" onclick="showSection('dashboard')"><span class="bnav-icon">◉</span>Inicio</button>
   <button onclick="showSection('courses')"><span class="bnav-icon">◎</span>Cursos</button>
