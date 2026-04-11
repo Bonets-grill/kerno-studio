@@ -11,6 +11,11 @@ vi.mock('@anthropic-ai/sdk', () => {
   return { default: M }
 })
 
+vi.mock('groq-sdk', () => {
+  class G { chat = { completions: { create: vi.fn() } }; constructor() {} }
+  return { default: G }
+})
+
 describe('Admin Layout', () => {
   it('renders sidebar nav items', async () => {
     const AdminLayout = (await import('@/app/(admin)/layout')).default

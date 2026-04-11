@@ -57,11 +57,12 @@ export const crmTemplate: TemplateDefinition = {
   --transition:0.15s ease;
 }
 html{font-size:14px}
-body{font-family:'Poppins',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+body{font-family:'Poppins',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);margin:0;padding:0;overflow:hidden;height:100vh}
+.app-layout{display:flex;height:100vh;overflow:hidden}
 a{color:inherit;text-decoration:none}
 
 /* ── Sidebar ── */
-.sidebar{position:fixed;top:0;left:0;width:250px;height:100vh;background:var(--sidebar-bg);z-index:100;display:flex;flex-direction:column;border-right:1px solid var(--card-border);transition:transform .25s ease}
+.sidebar{width:250px;min-width:250px;height:100vh;background:var(--sidebar-bg);display:flex;flex-direction:column;border-right:1px solid var(--card-border);transition:transform .25s ease;overflow-y:auto}
 .sidebar-brand{padding:24px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--card-border)}
 .sidebar-brand .brand-icon{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--primary),${primary}cc);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#fff;flex-shrink:0}
 .sidebar-brand .brand-name{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -77,7 +78,8 @@ a{color:inherit;text-decoration:none}
 .btn-upgrade:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(var(--primary-rgb),0.4)}
 
 /* ── Topbar ── */
-.topbar{position:fixed;top:0;left:250px;right:0;height:64px;background:var(--sidebar-bg);z-index:90;display:flex;align-items:center;justify-content:space-between;padding:0 30px;border-bottom:1px solid var(--card-border)}
+.main-area{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.topbar{height:64px;min-height:64px;background:var(--sidebar-bg);display:flex;align-items:center;justify-content:space-between;padding:0 30px;border-bottom:1px solid var(--card-border)}
 .topbar-title{font-size:17px;font-weight:700}
 .topbar-right{display:flex;align-items:center;gap:16px}
 .search-box{background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:6px;padding:7px 14px;color:var(--text);font-family:inherit;font-size:12px;width:200px;outline:none;transition:all var(--transition)}
@@ -90,7 +92,7 @@ a{color:inherit;text-decoration:none}
 .user-avatar:hover{transform:scale(1.05)}
 
 /* ── Main ── */
-.main-content{margin-left:250px;margin-top:64px;padding:30px;min-height:calc(100vh - 64px)}
+.main-content{flex:1;padding:30px;overflow-y:auto}
 .main-section{display:none;animation:fadeUp .3s ease}
 .main-section.active{display:block}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
@@ -261,6 +263,7 @@ tr:nth-child(even):hover td{background:rgba(255,255,255,0.03)}
 <button class="mobile-toggle" onclick="toggleSidebar()">&#9776;</button>
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
+<div class="app-layout">
 <!-- Sidebar -->
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-brand">
@@ -297,6 +300,8 @@ tr:nth-child(even):hover td{background:rgba(255,255,255,0.03)}
   </div>
 </aside>
 
+<!-- Main Area -->
+<div class="main-area">
 <!-- Topbar -->
 <header class="topbar">
   <div class="topbar-title" id="section-title">Dashboard</div>
@@ -897,6 +902,8 @@ tr:nth-child(even):hover td{background:rgba(255,255,255,0.03)}
   <!-- Footer -->
   <div class="footer">&copy; 2026 ${name} &mdash; Powered by <strong>Kerno Studio</strong></div>
 </main>
+</div><!-- /main-area -->
+</div><!-- /app-layout -->
 
 <!-- Bottom Nav (mobile only) -->
 <nav class="bottom-nav">

@@ -9,6 +9,14 @@ vi.mock('@anthropic-ai/sdk', () => {
   return { default: MockAnthropic }
 })
 
+vi.mock('groq-sdk', () => {
+  class MockGroq {
+    chat = { completions: { create: vi.fn() } }
+    constructor() {}
+  }
+  return { default: MockGroq }
+})
+
 vi.stubEnv('STRIPE_SECRET_KEY', 'sk_test_123')
 vi.stubEnv('STRIPE_WEBHOOK_SECRET', 'whsec_test')
 

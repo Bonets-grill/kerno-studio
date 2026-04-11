@@ -9,6 +9,14 @@ vi.mock('@anthropic-ai/sdk', () => {
   return { default: MockAnthropic }
 })
 
+vi.mock('groq-sdk', () => {
+  class MockGroq {
+    chat = { completions: { create: vi.fn() } }
+    constructor() {}
+  }
+  return { default: MockGroq }
+})
+
 describe('Prototype Prompt Builder', () => {
   it('builds prompt with summary data', async () => {
     const { buildPrototypePrompt } = await import('@/lib/prototype-prompt')

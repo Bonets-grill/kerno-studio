@@ -25,6 +25,14 @@ vi.mock('@anthropic-ai/sdk', () => {
   return { default: MockAnthropic }
 })
 
+vi.mock('groq-sdk', () => {
+  class MockGroq {
+    chat = { completions: { create: vi.fn() } }
+    constructor() {}
+  }
+  return { default: MockGroq }
+})
+
 vi.mock('next/dynamic', () => ({
   default: () => {
     const MockComponent = () => <div data-testid="mock-dynamic">Mock</div>

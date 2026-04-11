@@ -9,6 +9,14 @@ vi.mock('@anthropic-ai/sdk', () => {
   return { default: MockAnthropic }
 })
 
+vi.mock('groq-sdk', () => {
+  class MockGroq {
+    chat = { completions: { create: vi.fn() } }
+    constructor() {}
+  }
+  return { default: MockGroq }
+})
+
 // Mock env vars before imports
 vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://test.supabase.co')
 vi.stubEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY', 'test-anon-key')

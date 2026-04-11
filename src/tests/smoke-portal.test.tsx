@@ -12,6 +12,14 @@ vi.mock('@anthropic-ai/sdk', () => {
   return { default: MockAnthropic }
 })
 
+vi.mock('groq-sdk', () => {
+  class MockGroq {
+    chat = { completions: { create: vi.fn() } }
+    constructor() {}
+  }
+  return { default: MockGroq }
+})
+
 describe('Portal Layout', () => {
   it('renders sidebar with nav items', async () => {
     const PortalLayout = (await import('@/app/(portal)/layout')).default

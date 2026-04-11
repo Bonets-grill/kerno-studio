@@ -1,6 +1,15 @@
 import '@testing-library/jest-dom/vitest'
 import { vi } from 'vitest'
 
+// Mock Groq SDK globally (browser-like env blocks it)
+vi.mock('groq-sdk', () => {
+  class MockGroq {
+    chat = { completions: { create: vi.fn() } }
+    constructor() {}
+  }
+  return { default: MockGroq }
+})
+
 // Mock IntersectionObserver
 class MockIntersectionObserver {
   constructor(private callback: IntersectionObserverCallback) {}

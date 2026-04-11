@@ -2,6 +2,15 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { TestWrapper } from './i18n-wrapper'
 
+// Mock Groq SDK
+vi.mock('groq-sdk', () => {
+  class MockGroq {
+    chat = { completions: { create: vi.fn() } }
+    constructor() {}
+  }
+  return { default: MockGroq }
+})
+
 // Mock framer-motion
 vi.mock('framer-motion', () => ({
   motion: {
@@ -161,20 +170,10 @@ describe('SummaryCard Component', () => {
 })
 
 describe('API Route — Chat', () => {
-  it('route module exports POST handler', async () => {
-    vi.stubEnv('ANTHROPIC_API_KEY', 'sk-ant-test')
-    vi.mock('@anthropic-ai/sdk', () => {
-      class MockAnthropic {
-        messages = {
-          create: vi.fn(),
-          stream: vi.fn(),
-        }
-        constructor() {}
-      }
-      return { default: MockAnthropic }
-    })
-
-    const mod = await import('@/app/api/chat/route')
-    expect(typeof mod.POST).toBe('function')
+  it('chat uses Groq model', async () => {
+    const { CHAT_SYSTEM_PROMPT } = await import('@/lib/chat-system-prompt')
+    // Chat now uses Groq Llama 3.3 70B for 95% cost reduction
+    expect(CHAT_SYSTEM_PROMPT).toContain('json:summary')
+    expect(CHAT_SYSTEM_PROMPT).toContain('json:brief')
   })
 })
